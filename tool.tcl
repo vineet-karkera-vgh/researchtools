@@ -1,9 +1,7 @@
 #Author: Vineet Karkera
 package require Tk
 
-global columns
 global delimiter
-global colNames
 set columns ""
 set delimiter ,
 
@@ -20,8 +18,9 @@ proc setListOfColumns {} {
        set ::columns ""
 	   set returnValue 1
    }
-   puts "The columns are $::columns"
-   puts $::colNames
+   puts "The value of dollar colon colNames is $::colNames"
+   puts "value of dollar colon columns is -{$::columns}-"
+   puts "value of length of columns is -[llength {$::columns}]-"
    return $returnValue
 };
 
@@ -65,57 +64,57 @@ proc getColumnNames { } {
 
 #proc to open first file
 proc openFile1 { } {
-set fn "openFile1"
-global f
+	set fn "openFile1"
+	global f
 
-set myFile [tk_getOpenFile]
+	set myFile [tk_getOpenFile]
 
-puts stdout [format "%s:myFile=<%s>" $fn $myFile]
+	puts stdout [format "%s:myFile=<%s>" $fn $myFile]
 
-set fileID [open $myFile r]
+	set fileID [open $myFile r]
 
-#fetch first line from the file - header names
-set firstLine [getFirstLineFromFile $myFile]
+	#fetch first line from the file - header names
+	set firstLine [getFirstLineFromFile $myFile]
 
-#split first line into column names
-set ::colNames [split $firstLine ,]
+	#split first line into column names
+	set ::colNames [split $firstLine ,]
 
-puts "Number of Columns [llength $::colNames] are $::colNames" 
+	puts "Number of Columns [llength $::colNames] are $::colNames" 
 
-set returnVal [setListOfColumns]
-puts "Return Value is $returnVal"
+	set returnVal [setListOfColumns]
+	puts "The return value of setListOFColumns is $returnVal"
 
-set i 1
-$f.text1 delete 1.0 end
-while { [gets $fileID line] >= 0 } {
-	puts stdout [format "line(%d)=%s" $i $line]
-	$f.text1 insert end [format "%s\n" $line]
-	incr i
-	} ;
+	set i 1
+	$f.text1 delete 1.0 end
+	while { [gets $fileID line] >= 0 } {
+		puts stdout [format "line(%d)=%s" $i $line]
+		$f.text1 insert end [format "%s\n" $line]
+		incr i
+		} ;
 
-close $fileID
+	close $fileID
 
 } ; 
 
 # proc to open second file
 proc openFile2 { } {
-set fn "openFile2"
-global f
+	set fn "openFile2"
+	global f
 
-set myFile [tk_getOpenFile]
+	set myFile [tk_getOpenFile]
 
-puts stdout [format "%s:myFile=<%s>" $fn $myFile]
+	puts stdout [format "%s:myFile=<%s>" $fn $myFile]
 
-set fileID [open $myFile r]
-set i 1
-$f.text2 delete 1.0 end
-while { [gets $fileID line] >= 0 } {
-	puts stdout [format "line(%d)=%s" $i $line]
-	$f.text2 insert end [format "%s\n" $line]
-	incr i
-	} ;
+	set fileID [open $myFile r]
+	set i 1
+	$f.text2 delete 1.0 end
+	while { [gets $fileID line] >= 0 } {
+		puts stdout [format "line(%d)=%s" $i $line]
+		$f.text2 insert end [format "%s\n" $line]
+		incr i
+		} ;
 
-close $fileID
+	close $fileID
 } ;
 
 #setting up window
@@ -124,6 +123,7 @@ wm title  .   "Privacy Preserving Algorithm Analysis Tool"
 
 #setting up the frame stuff
 destroy .myArea
+global f
 set f [frame .myArea -borderwidth 10 -background orange]
 
 
@@ -174,13 +174,12 @@ pack $f.lblColumns  -padx 20
 label $f.labelHeader -textvariable columns -background orange -compound left  
 pack $f.labelHeader  -padx 20
 
-puts "value of dollar colon columns is -{$::columns}-"
-puts "value of dollar columns is -{$columns}-"
-puts "value of dollar colon colNames is -{$colNames}-"
+puts "2 value of dollar columns is -[llength $columns]-"
+puts "2 value of dollar colNames is - [llength $::columns] -"
 #vineet
-foreach x $columns {	
+foreach x $::columns {	
 	puts "hello"
-	puts "value of xx is $x"
+	puts "value of x is $x"
 	label [set f.labelHeader$x] -textvariable $x -background orange -compound left
     pack [set f.labelHeader$x]  -padx 20
 }
