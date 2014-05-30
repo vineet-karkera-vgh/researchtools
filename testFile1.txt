@@ -1,0 +1,8 @@
+NAME,OCCUPATION,GENDER,ADDRESS,PO BOX,SALARY,BRIBES,DRUGS ,IT RETURNS,CHARITY
+baba ramdev,s e c,3,4 , 5 , 6 ,7 , ,9,10
+first row,s e c,3,4 , 5 , 6 ,7 , ,9,10
+first row,s e c,3,4 , 5 , 6 ,7 , ,9,10
+first row,s e c,3,4 , 5 , 6 ,7 , ,9,10
+first row,s e c,3,4 , 5 , 6 ,7 , ,9,10
+first row,s e c,3,4 , 5 , 6 ,7 , ,9,10
+first row,s e c,3,4 , 5 , 6 ,7 , ,9,10

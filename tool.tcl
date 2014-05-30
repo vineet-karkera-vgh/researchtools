@@ -1,7 +1,41 @@
 #Author: Vineet Karkera
 package require Tk
 
-proc splitFile { } {
+global columns
+global delimiter
+global colNames
+set columns ""
+set delimiter ,
+
+proc analyze {} {  
+  
+};
+
+proc setListOfColumns {} {  
+   set returnValue 0
+   if {[catch {
+       set ::columns $::colNames
+   }
+   ]!=0} {
+       set ::columns ""
+	   set returnValue 1
+   }
+   puts "The columns are $::columns"
+   puts $::colNames
+   return $returnValue
+};
+
+proc getFirstLineFromFile {filename} {
+	set f [open $filename r]
+    set line [gets $f]
+    if {[eof $f]} {
+        close $f
+        break
+    }
+    return $line
+};
+ 
+proc getColumnNames { } {
 	set fn "splitFile"
 	global f
 
@@ -11,6 +45,8 @@ proc splitFile { } {
 	set fp [open $myFile r];
 	set file_data [read $fp];
 	puts $file_data;
+	
+	
 
 	#count number of columns
 
@@ -37,6 +73,18 @@ set myFile [tk_getOpenFile]
 puts stdout [format "%s:myFile=<%s>" $fn $myFile]
 
 set fileID [open $myFile r]
+
+#fetch first line from the file - header names
+set firstLine [getFirstLineFromFile $myFile]
+
+#split first line into column names
+set ::colNames [split $firstLine ,]
+
+puts "Number of Columns [llength $::colNames] are $::colNames" 
+
+set returnVal [setListOfColumns]
+puts "Return Value is $returnVal"
+
 set i 1
 $f.text1 delete 1.0 end
 while { [gets $fileID line] >= 0 } {
@@ -111,8 +159,34 @@ pack $f.browse2  -padx 20
 text $f.text2 -bd 2 -bg white -height 7
 pack $f.text2 -padx 20 -pady 5
 
+#widget - specify delimiter
+label $f.lblDelimiter -text "Step 3 : Specify a delimiter" -background orange -compound left 
+pack $f.lblDelimiter  -padx 20
+
+entry $f.entryDelimiter -width 10 -bd 2 -textvariable delimiter
+pack $f.entryDelimiter  -padx 20
+
+#widget - upload file label
+label $f.lblColumns -text "Step 4 : Select the columns with Sensitive data" -background orange -compound left 
+pack $f.lblColumns  -padx 20
+
+#print out the header names
+label $f.labelHeader -textvariable columns -background orange -compound left  
+pack $f.labelHeader  -padx 20
+
+puts "value of dollar colon columns is -{$::columns}-"
+puts "value of dollar columns is -{$columns}-"
+puts "value of dollar colon colNames is -{$colNames}-"
+#vineet
+foreach x $columns {	
+	puts "hello"
+	puts "value of xx is $x"
+	label [set f.labelHeader$x] -textvariable $x -background orange -compound left
+    pack [set f.labelHeader$x]  -padx 20
+}
+
 #sixth widget - browse button
-button $f.analyze -text "Analyze Now" -background lightgrey -command {exit}
+button $f.analyze -text "Analyze Now" -background lightgrey -command {analyze}
 pack $f.analyze -padx 20 -pady 20
 
 #widget - list of metrics
