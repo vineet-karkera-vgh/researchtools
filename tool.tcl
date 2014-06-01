@@ -1,28 +1,30 @@
 #Author: Vineet Karkera
 package require Tk
 
-global delimiter
-set columns ""
-set delimiter ,
+#set columns ""
+set colNames ""
+set delimiter ","
 
 proc analyze {} {  
   
 };
 
-proc setListOfColumns {} {  
-   set returnValue 0
-   if {[catch {
-       set ::columns $::colNames
-   }
-   ]!=0} {
-       set ::columns ""
-	   set returnValue 1
-   }
-   puts "The value of dollar colon colNames is $::colNames"
-   puts "value of dollar colon columns is -{$::columns}-"
-   puts "value of length of columns is -[llength {$::columns}]-"
-   return $returnValue
-};
+# proc setListOfColumns {} {
+	# global columns
+	# global colNames
+   # set returnValue 0
+   # if {[catch {
+       # set columns $colNames
+   # }
+   # ]!=0} {
+       # set columns ""
+	   # set returnValue 1
+   # }
+   # puts "The value of dollar colon colNames is $colNames"
+   # puts "value of dollar colon columns is -{$columns}-"
+   # puts "value of length of columns is -[llength {$columns}]-"
+   # return $returnValue
+# };
 
 proc getFirstLineFromFile {filename} {
 	set f [open $filename r]
@@ -35,7 +37,7 @@ proc getFirstLineFromFile {filename} {
 };
  
 proc getColumnNames { } {
-	set fn "splitFile"
+	set fn "getColumnNames"
 	global f
 
 	set myFile [tk_getOpenFile]
@@ -66,6 +68,7 @@ proc getColumnNames { } {
 proc openFile1 { } {
 	set fn "openFile1"
 	global f
+	global colNames
 
 	set myFile [tk_getOpenFile]
 
@@ -77,12 +80,14 @@ proc openFile1 { } {
 	set firstLine [getFirstLineFromFile $myFile]
 
 	#split first line into column names
-	set ::colNames [split $firstLine ,]
+	set colNames [split $firstLine ,]
 
-	puts "Number of Columns [llength $::colNames] are $::colNames" 
+	puts "Number of Columnssss [llength $::colNames] are $::colNames" 
+	
+	buildCheckboxFrame;
 
-	set returnVal [setListOfColumns]
-	puts "The return value of setListOFColumns is $returnVal"
+#	set returnVal [setListOfColumns]
+#	puts "The return value of setListOFColumns is $returnVal"
 
 	set i 1
 	$f.text1 delete 1.0 end
@@ -93,7 +98,6 @@ proc openFile1 { } {
 		} ;
 
 	close $fileID
-
 } ; 
 
 # proc to open second file
@@ -117,13 +121,32 @@ proc openFile2 { } {
 	close $fileID
 } ;
 
+proc buildCheckboxFrame {} {
+	global colNames;
+	set f ".cbframe";
+	if {[winfo exists $f]} { destroy $f };
+	frame $f -borderwidth 10 -background orange;
+	# Warning, each colName might not be a nicely formatted widget name.
+	# For example, some of your colNames have spaces in them;
+	# This will work here, but it makes the auto-generated variables
+	# "yes$x" have odd names. It may be better to use an array
+	# to hold your options. For example, instead of using "yes$x"
+	# as the variable name, you could use "options($x)" as an element
+	# of an array holding the variables;
+	foreach x $colNames {
+		set c [checkbutton $f.checkbox$x -text $x -variable yes$x -anchor nw];
+		pack $c -side top -anchor nw -fill x -expand false;
+	}
+	puts "im here";
+	pack $f -side bottom -anchor nw -fill x -expand true;
+}
+
 #setting up window
-wm geometry  .   400x650+10+10
-wm title  .   "Privacy Preserving Algorithm Analysis Tool"
+wm geometry . "400x650+10+10"
+wm title . "Privacy Preserving Algorithm Analysis Tool"
 
 #setting up the frame stuff
 destroy .myArea
-global f
 set f [frame .myArea -borderwidth 10 -background orange]
 
 
@@ -150,14 +173,14 @@ pack $f.text1 -padx 20 -pady 5
 
 #fourth widget - upload file label
 label $f.lbl3 -text "Step 2 : Upload Output File" -background orange -compound left 
-pack $f.lbl3  -padx 20
+#pack $f.lbl3  -padx 20
 
 #fifth widget - Browse button
 button $f.browse2 -text "Browse" -background lightgrey -command {openFile2}
-pack $f.browse2  -padx 20
+#pack $f.browse2  -padx 20
 
 text $f.text2 -bd 2 -bg white -height 7
-pack $f.text2 -padx 20 -pady 5
+#pack $f.text2 -padx 20 -pady 5
 
 #widget - specify delimiter
 label $f.lblDelimiter -text "Step 3 : Specify a delimiter" -background orange -compound left 
@@ -171,13 +194,13 @@ label $f.lblColumns -text "Step 4 : Select the columns with Sensitive data" -bac
 pack $f.lblColumns  -padx 20
 
 #print out the header names
-label $f.labelHeader -textvariable columns -background orange -compound left  
+label $f.labelHeader -textvariable colNames -background orange -compound left  
 pack $f.labelHeader  -padx 20
 
-puts "2 value of dollar columns is -[llength $columns]-"
-puts "2 value of dollar colNames is - [llength $::columns] -"
+puts "2 value of dollar colNames is -$colNames-"
+puts "2 value of dollar colNames is - [llength $colNames] -"
 #vineet
-foreach x $::columns {	
+foreach x $colNames {	
 	puts "hello"
 	puts "value of x is $x"
 	label [set f.labelHeader$x] -textvariable $x -background orange -compound left
