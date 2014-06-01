@@ -1,30 +1,33 @@
 #Author: Vineet Karkera
 package require Tk
 
-#set columns ""
 set colNames ""
 set delimiter ","
 
 proc analyze {} {  
-  
+	global analyzeFrame welcomeFrame
+	set analyzeFrame ".analyzeFrame";
+	if {[winfo exists $analyzeFrame]} { destroy $analyzeFrame };
+	frame $analyzeFrame -borderwidth 10 -background orange;
+	
+	#pack the welcome frame
+	pack $::welcomeFrame -side top -expand true -fill both 
+	
+	#widgets in the window
+	#widget - list of metrics
+	label $analyzeFrame.lbl4 -text "Efficiency  %" -background orange -compound left 
+	label $analyzeFrame.lbl5 -text "Accuracy  %" -background orange -compound left 
+	label $analyzeFrame.lbl6 -text "Privacy  %" -background orange -compound left 
+	label $analyzeFrame.lbl7 -text "Metric 3" -background orange -compound left 
+	label $analyzeFrame.lbl8 -text "Metric 4" -background orange -compound left 
+	label $analyzeFrame.lbl9 -text "Metric 5" -background orange -compound left 
+	label $analyzeFrame.lbl10 -text "Metric 6" -background orange -compound left
+	pack $analyzeFrame.lbl4 $analyzeFrame.lbl5 $analyzeFrame.lbl6 $analyzeFrame.lbl7 $analyzeFrame.lbl8 $analyzeFrame.lbl9 $analyzeFrame.lbl10  -padx 20
+ 
+	#destroy previous frame and packs the new frame
+	if {[winfo exists .fourthFrame]} { destroy .fourthFrame };
+	pack $analyzeFrame -side top -expand true -fill both
 };
-
-# proc setListOfColumns {} {
-	# global columns
-	# global colNames
-   # set returnValue 0
-   # if {[catch {
-       # set columns $colNames
-   # }
-   # ]!=0} {
-       # set columns ""
-	   # set returnValue 1
-   # }
-   # puts "The value of dollar colon colNames is $colNames"
-   # puts "value of dollar colon columns is -{$columns}-"
-   # puts "value of length of columns is -[llength {$columns}]-"
-   # return $returnValue
-# };
 
 proc getFirstLineFromFile {filename} {
 	set f [open $filename r]
@@ -36,36 +39,8 @@ proc getFirstLineFromFile {filename} {
     return $line
 };
  
-proc getColumnNames { } {
-	set fn "getColumnNames"
-	global f
-
-	set myFile [tk_getOpenFile]
-
-	# Load file into a variable
-	set fp [open $myFile r];
-	set file_data [read $fp];
-	puts $file_data;
-	
-	
-
-	#count number of columns
-
-
-	#find difference of two files
-
-
-	#count number of rows
-
-
-	#split result into separate arrays of columns
-
-
-
-} ; 
-
 #proc to open first file
-proc openFile1 { } {
+proc openFile1 {} {
 	set fn "openFile1"
 	global f
 	global colNames
@@ -82,13 +57,7 @@ proc openFile1 { } {
 	#split first line into column names
 	set colNames [split $firstLine ,]
 
-	puts "Number of Columnssss [llength $::colNames] are $::colNames" 
-	
-	buildCheckboxFrame;
-
-#	set returnVal [setListOfColumns]
-#	puts "The return value of setListOFColumns is $returnVal"
-
+	#populates the textarea with new information
 	set i 1
 	$f.text1 delete 1.0 end
 	while { [gets $fileID line] >= 0 } {
@@ -101,135 +70,164 @@ proc openFile1 { } {
 } ; 
 
 # proc to open second file
-proc openFile2 { } {
+proc openFile2 {} {
 	set fn "openFile2"
-	global f
+	global secondFrame
 
 	set myFile [tk_getOpenFile]
 
 	puts stdout [format "%s:myFile=<%s>" $fn $myFile]
 
 	set fileID [open $myFile r]
+	
+	#populates the textarea with new information
 	set i 1
-	$f.text2 delete 1.0 end
+	$secondFrame.text2 delete 1.0 end
 	while { [gets $fileID line] >= 0 } {
 		puts stdout [format "line(%d)=%s" $i $line]
-		$f.text2 insert end [format "%s\n" $line]
+		$secondFrame.text2 insert end [format "%s\n" $line]
 		incr i
 		} ;
 
 	close $fileID
-} ;
+};
 
-proc buildCheckboxFrame {} {
-	global colNames;
-	set f ".cbframe";
-	if {[winfo exists $f]} { destroy $f };
-	frame $f -borderwidth 10 -background orange;
-	# Warning, each colName might not be a nicely formatted widget name.
-	# For example, some of your colNames have spaces in them;
-	# This will work here, but it makes the auto-generated variables
-	# "yes$x" have odd names. It may be better to use an array
-	# to hold your options. For example, instead of using "yes$x"
-	# as the variable name, you could use "options($x)" as an element
-	# of an array holding the variables;
+#Selecting the columns with sensitive information
+proc gotoFourthStep {} {	
+	global colNames welcomeFrame fourthFrame
+	set fourthFrame ".fourthFrame";
+	if {[winfo exists $fourthFrame]} { destroy $fourthFrame };
+	frame $fourthFrame -borderwidth 10 -background orange;
+	
+	#pack the welcome frame
+	pack $::welcomeFrame -side top -expand true -fill both 
+	
+	#widgets in the window
+	#widget - upload file label
+	label $fourthFrame.lblColumns -text "Step 4 : Select the columns with Sensitive data" -background orange -compound left 
+	pack $fourthFrame.lblColumns  -padx 20
+	
+	#widget - checkbox
 	foreach x $colNames {
-		set c [checkbutton $f.checkbox$x -text $x -variable yes$x -anchor nw];
+		set c [checkbutton $fourthFrame.checkbox$x -text $x -variable yes$x -anchor nw -background orange];
 		pack $c -side top -anchor nw -fill x -expand false;
 	}
-	puts "im here";
-	pack $f -side bottom -anchor nw -fill x -expand true;
+	
+	#widget - next step button
+	button $fourthFrame.nextStep -text "Final Step - Analyze" -background lightgrey -command {analyze}
+	pack $fourthFrame.nextStep -padx 20 -pady 20
+	
+	#destroy previous frame and pack new frame
+	if {[winfo exists .thirdFrame]} { destroy .thirdFrame};
+	pack $fourthFrame -side top -expand true -fill both
+}
+
+#selecting the delimiter
+proc gotoThirdStep {} {
+	global thirdFrame welcomeFrame
+	set thirdFrame ".thirdFrame";
+	if {[winfo exists $thirdFrame]} { destroy $thirdFrame };
+	frame $thirdFrame -borderwidth 10 -background orange;
+	
+	#pack the welcome frame
+	pack $::welcomeFrame -side top -expand true -fill both 
+	
+	#widgets in the window
+	#widget - specify delimiter
+	label $thirdFrame.lblDelimiter -text "Step 3 : Specify a delimiter" -background orange -compound left 
+	pack $thirdFrame.lblDelimiter  -padx 20
+
+	#widget - delimiter entry field
+	entry $thirdFrame.entryDelimiter -width 10 -bd 2 -textvariable delimiter
+	pack $thirdFrame.entryDelimiter  -padx 20
+	
+	#widget - next step button
+	button $thirdFrame.nextStep -text "Next Step ->" -background lightgrey -command {gotoFourthStep}
+	pack $thirdFrame.nextStep -padx 20 -pady 20
+	
+	#destroy previous frame and pack new frame
+	if {[winfo exists .secondFrame]} { destroy .secondFrame };
+	pack $thirdFrame -side top -expand true -fill both
+}
+
+# Upload the Second File
+proc gotoSecondStep {} {
+	global secondFrame welcomeFrame
+	set secondFrame ".secondFrame";
+	if {[winfo exists $secondFrame]} { destroy $secondFrame };
+	frame $secondFrame -borderwidth 10 -background orange;
+	
+	#pack the welcome frame
+	pack $::welcomeFrame -side top -expand true -fill both 
+	
+	#widgets in the window
+	#widget - upload file label
+	label $secondFrame.lbl3 -text "Step 2 : Upload Output File" -background orange -compound left 
+	pack $secondFrame.lbl3  -padx 20
+
+	#widget - Browse button
+	button $secondFrame.browse2 -text "Browse" -background lightgrey -command {openFile2}
+	pack $secondFrame.browse2  -padx 20
+
+	#widget - textArea
+	text $secondFrame.text2 -bd 2 -bg white -height 7
+	pack $secondFrame.text2 -padx 20 -pady 5
+	
+	#widget - next step button
+	button $secondFrame.nextStep -text "Next Step ->" -background lightgrey -command {gotoThirdStep}
+	pack $secondFrame.nextStep -padx 20 -pady 20
+	
+	# lines within the text area
+	$secondFrame.text2 insert end "Please upload a csv file from the menu\n" tag0
+	$secondFrame.text2 insert end "Or paste the contents of the sample output file here.." tag1
+	
+	#delete previous frame
+	if {[winfo exists .myArea]} { destroy .myArea };
+	pack $secondFrame -side top -expand true -fill both
 }
 
 #setting up window
-wm geometry . "400x650+10+10"
+wm geometry . "350x400+10+10"
 wm title . "Privacy Preserving Algorithm Analysis Tool"
 
 #setting up the frame stuff
 destroy .myArea
 set f [frame .myArea -borderwidth 10 -background orange]
-
+set welcomeFrame [frame .welcomeFrame -borderwidth 10 -background orange]
 
 #widgets in the window
+#widget - name of tool
+label $welcomeFrame.border1 -text "----------------------------------------------" -background orange
+pack $welcomeFrame.border1 -padx 20 -pady 5
+label $welcomeFrame.lbl1 -text "Welcome to the Privacy Preserving Analysis tool" -background orange
+label $welcomeFrame.border2 -text "----------------------------------------------" -background orange
+pack $welcomeFrame.lbl1 -padx 20 -pady 5
+pack $welcomeFrame.border2 -padx 20 -pady 5
 
-#first widget - name of tool
-label $f.border1 -text "----------------------------------------------" -background orange
-pack $f.border1 -padx 20 -pady 5
-label $f.lbl1 -text "Welcome to the Privacy Preserving Analysis tool" -background orange
-label $f.border2 -text "----------------------------------------------" -background orange
-pack $f.lbl1 -padx 20 -pady 5
-pack $f.border2 -padx 20 -pady 5
+#pack the welcome frame
+pack $welcomeFrame -side top -expand true -fill both 
 
-#second widget - upload file label
+#widget - upload file label
 label $f.lbl2 -text "Step 1 : Upload Input File" -background orange -compound left 
 pack $f.lbl2  -padx 20
 
-#third widget - Browse button
+#widget - Browse button
 button $f.browse1 -text "Browse" -background lightgrey -command {openFile1}
 pack $f.browse1  -padx 20
 
 text $f.text1 -bd 2 -bg white -height 7
 pack $f.text1 -padx 20 -pady 5
 
-#fourth widget - upload file label
-label $f.lbl3 -text "Step 2 : Upload Output File" -background orange -compound left 
-#pack $f.lbl3  -padx 20
+#widget - next step button
+button $f.nextStep -text "Next Step ->" -background lightgrey -command {gotoSecondStep}
+pack $f.nextStep -padx 20 -pady 20
 
-#fifth widget - Browse button
-button $f.browse2 -text "Browse" -background lightgrey -command {openFile2}
-#pack $f.browse2  -padx 20
-
-text $f.text2 -bd 2 -bg white -height 7
-#pack $f.text2 -padx 20 -pady 5
-
-#widget - specify delimiter
-label $f.lblDelimiter -text "Step 3 : Specify a delimiter" -background orange -compound left 
-pack $f.lblDelimiter  -padx 20
-
-entry $f.entryDelimiter -width 10 -bd 2 -textvariable delimiter
-pack $f.entryDelimiter  -padx 20
-
-#widget - upload file label
-label $f.lblColumns -text "Step 4 : Select the columns with Sensitive data" -background orange -compound left 
-pack $f.lblColumns  -padx 20
-
-#print out the header names
-label $f.labelHeader -textvariable colNames -background orange -compound left  
-pack $f.labelHeader  -padx 20
-
-puts "2 value of dollar colNames is -$colNames-"
-puts "2 value of dollar colNames is - [llength $colNames] -"
-#vineet
-foreach x $colNames {	
-	puts "hello"
-	puts "value of x is $x"
-	label [set f.labelHeader$x] -textvariable $x -background orange -compound left
-    pack [set f.labelHeader$x]  -padx 20
-}
-
-#sixth widget - browse button
-button $f.analyze -text "Analyze Now" -background lightgrey -command {analyze}
-pack $f.analyze -padx 20 -pady 20
-
-#widget - list of metrics
-label $f.lbl4 -text "Efficiency  %" -background orange -compound left 
-label $f.lbl5 -text "Accuracy  %" -background orange -compound left 
-label $f.lbl6 -text "Privacy  %" -background orange -compound left 
-label $f.lbl7 -text "Metric 3" -background orange -compound left 
-label $f.lbl8 -text "Metric 4" -background orange -compound left 
-label $f.lbl9 -text "Metric 5" -background orange -compound left 
-label $f.lbl10 -text "Metric 6" -background orange -compound left
- 
-pack $f.lbl4 $f.lbl5 $f.lbl6 $f.lbl7 $f.lbl8 $f.lbl9 $f.lbl10  -padx 20
-
+#pack the entire first frame
 pack $f -side top -expand true -fill both 
 
 # lines within the text area
 $f.text1 insert end "Please upload a csv file from the menu\n" tag0
 $f.text1 insert end "Or paste the contents of the sample input file here.." tag1
-
-$f.text2 insert end "Please upload a csv file from the menu\n" tag0
-$f.text2 insert end "Or paste the contents of the sample output file here.." tag1
 
 #creates a menubar
 menu .menubar
