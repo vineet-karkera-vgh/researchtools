@@ -1,12 +1,30 @@
 #Author: Vineet Karkera
 package require Tk
 
+#default values
+#contains column names
 set colNames ""
+#contains the delimiter, default set to comma
 set delimiter ","
+#contains an array with key value pair of columns that are privacy sensitive
+array set sensitiveArray {}
+#contains default value of checkboxes
+set checkboxValue 0
+
+proc getSensitiveArray {} {  
+	global senitiveArray
+	foreach {key value} [array get senitiveArray] {
+		puts "Key: $key Value: $value" 
+	}
+};
 
 proc analyze {} {  
 	global analyzeFrame welcomeFrame
 	set analyzeFrame ".analyzeFrame";
+	
+	getSensitiveArray;
+	
+	
 	if {[winfo exists $analyzeFrame]} { destroy $analyzeFrame };
 	frame $analyzeFrame -borderwidth 10 -background orange;
 	
@@ -94,7 +112,7 @@ proc openFile2 {} {
 
 #Selecting the columns with sensitive information
 proc gotoFourthStep {} {	
-	global colNames welcomeFrame fourthFrame
+	global colNames welcomeFrame fourthFrame sensitiveArray
 	set fourthFrame ".fourthFrame";
 	if {[winfo exists $fourthFrame]} { destroy $fourthFrame };
 	frame $fourthFrame -borderwidth 10 -background orange;
@@ -107,9 +125,11 @@ proc gotoFourthStep {} {
 	label $fourthFrame.lblColumns -text "Step 4 : Select the columns with Sensitive data" -background orange -compound left 
 	pack $fourthFrame.lblColumns  -padx 20
 	
-	#widget - checkbox
+	set i 0
+	# #widget - checkbox
 	foreach x $colNames {
-		set c [checkbutton $fourthFrame.checkbox$x -text $x -variable yes$x -anchor nw -background orange];
+		set c [checkbutton $fourthFrame.checkbox$x -text $x -variable checkboxValue$i -anchor nw -background orange];
+		incr i
 		pack $c -side top -anchor nw -fill x -expand false;
 	}
 	
@@ -120,7 +140,7 @@ proc gotoFourthStep {} {
 	#destroy previous frame and pack new frame
 	if {[winfo exists .thirdFrame]} { destroy .thirdFrame};
 	pack $fourthFrame -side top -expand true -fill both
-}
+};
 
 #selecting the delimiter
 proc gotoThirdStep {} {
@@ -179,7 +199,7 @@ proc gotoSecondStep {} {
 	
 	# lines within the text area
 	$secondFrame.text2 insert end "Please upload a csv file from the menu\n" tag0
-	$secondFrame.text2 insert end "Or paste the contents of the sample output file here.." tag1
+	$secondFrame.text2 insert end "Or use the Browse button above.." tag1
 	
 	#delete previous frame
 	if {[winfo exists .myArea]} { destroy .myArea };
@@ -187,7 +207,7 @@ proc gotoSecondStep {} {
 }
 
 #setting up window
-wm geometry . "350x400+10+10"
+wm geometry . "350x600+10+10"
 wm title . "Privacy Preserving Algorithm Analysis Tool"
 
 #setting up the frame stuff
@@ -227,7 +247,7 @@ pack $f -side top -expand true -fill both
 
 # lines within the text area
 $f.text1 insert end "Please upload a csv file from the menu\n" tag0
-$f.text1 insert end "Or paste the contents of the sample input file here.." tag1
+$f.text1 insert end "Or use the Browse button above...." tag1
 
 #creates a menubar
 menu .menubar
