@@ -11,9 +11,16 @@ array set sensitiveArray {}
 #contains default value of checkboxes
 set checkboxValue 0
 
+proc setSensitiveArray{} {
+	global sensitiveArray
+
+
+}
+
+
 proc getSensitiveArray {} {  
-	global senitiveArray
-	foreach {key value} [array get senitiveArray] {
+	global sensitiveArray
+	foreach {key value} [array get sensitiveArray] {
 		puts "Key: $key Value: $value" 
 	}
 };
@@ -128,7 +135,8 @@ proc gotoFourthStep {} {
 	set i 0
 	# #widget - checkbox
 	foreach x $colNames {
-		set c [checkbutton $fourthFrame.checkbox$x -text $x -variable checkboxValue$i -anchor nw -background orange];
+		global checkboxValue$i
+		set c [checkbutton $fourthFrame.checkbox$x -text $x -variable checkboxValue$i -anchor nw -background orange -command setSensitiveArray{checkboxValue$i}];
 		incr i
 		pack $c -side top -anchor nw -fill x -expand false;
 	}
