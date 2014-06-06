@@ -65,23 +65,23 @@ proc analyze {} {
 	pack $analyzeFrame -side top -expand true -fill both
 };
 
-#proc to get the forst line of the file
+#proc to get the first line of the file
 proc getFirstLineFromFile {filename} {
 	set f [open $filename r]
     set line [gets $f]
-    if {[eof $f]} {
-        close $f
-        break
-    }
+    close $f
     return $line
 };
 
 #proc to split the data into columns
 proc splitIntoColumns {filename} {
 	global numCols
-	set f [open $filename r]
+	set f [open $filename r]	
+	#the first line containing header names is skipped
+	set line [gets $f]
 	set file_data [read $f]
 	close $f
+	
 	set data [split $file_data "\n"]
     foreach {line} $data {
 		set csvdata [split $line ","]
