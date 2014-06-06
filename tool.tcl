@@ -11,12 +11,23 @@ array set sensitiveArray {}
 #contains default value of checkboxes
 set checkboxValue 0
 
-proc setSensitiveArray{} {
-	global sensitiveArray
-
-
-}
-
+proc setSensitiveArray {} {  
+	# global x colNames 
+	# set i 0
+	# foreach var $colNames {
+	# set temp1 $var$i
+	# set temp2 [set $temp1]
+	# puts "ahem $temp1 and $temp2"
+    # if {[info exists $var${i}]} {
+			# puts "$var$i does indeed exist"
+		# } else {
+			# puts "$var sadly does not exist"
+		# }
+		# incr i
+	# }
+	# puts "The value of the column is $x"
+	
+};
 
 proc getSensitiveArray {} {  
 	global sensitiveArray
@@ -54,6 +65,7 @@ proc analyze {} {
 	pack $analyzeFrame -side top -expand true -fill both
 };
 
+#proc to get the forst line of the file
 proc getFirstLineFromFile {filename} {
 	set f [open $filename r]
     set line [gets $f]
@@ -63,12 +75,40 @@ proc getFirstLineFromFile {filename} {
     }
     return $line
 };
+
+#proc to split the data into columns
+proc splitIntoColumns {filename} {
+	global numCols
+	set f [open $filename r]
+	set file_data [read $f]
+	close $f
+	set data [split $file_data "\n"]
+    foreach {line} $data {
+		set csvdata [split $line ","]
+		set i 0
+		foreach {element} $csvdata {
+			global col$i
+			lappend col$i $element
+			incr i			
+		}
+	}
+	#debugging
+	puts "Col : $col0"
+	puts "Col : $col1"
+	puts "Col : $col2"
+	puts "Col : $col3"
+	puts "Col : $col4"
+	puts "Col : $col5"
+	puts "Col : $col6"
+	puts "Col : $col7"
+	puts "Col : $col8"
+	puts "Col : $col9"
+};
  
 #proc to open first file
 proc openFile1 {} {
 	set fn "openFile1"
-	global f
-	global colNames
+	global f colNames numCols
 
 	set myFile [tk_getOpenFile]
 
@@ -81,7 +121,27 @@ proc openFile1 {} {
 
 	#split first line into column names
 	set colNames [split $firstLine ,]
+	
+	#number of columns in the file
+	set numCols [llength  $colNames ]
+	puts "Number of columns in $colNames is $numCols" 
 
+	#the data is split into individual columns
+	splitIntoColumns $myFile;
+	
+	#debugging - vineet - to check if global variables work
+	global col0 col1 col2 col3 col4 col5 col6 col7 col8 col9
+	puts "Col : $col0"
+	puts "Col : $col1"
+	puts "Col : $col2"
+	puts "Col : $col3"
+	puts "Col : $col4"
+	puts "Col : $col5"
+	puts "Col : $col6"
+	puts "Col : $col7"
+	puts "Col : $col8"
+	puts "Col : $col9"
+	
 	#populates the textarea with new information
 	set i 1
 	$f.text1 delete 1.0 end
@@ -134,9 +194,17 @@ proc gotoFourthStep {} {
 	
 	set i 0
 	# #widget - checkbox
+	global x
 	foreach x $colNames {
-		global checkboxValue$i
-		set c [checkbutton $fourthFrame.checkbox$x -text $x -variable checkboxValue$i -anchor nw -background orange -command setSensitiveArray{checkboxValue$i}];
+		#global checkboxValue$i
+		#set c [checkbutton $fourthFrame.checkbox$x -text $x -variable checkboxValue$i -anchor nw -background orange -command [setSensitiveArray]];
+		#set c [checkbutton $fourthFrame.checkbox($x) -text $x -variable checkboxVal$i -anchor nw -background orange -command [puts [expr $checkboxVal${i}]]];
+		set c [checkbutton $fourthFrame.checkbox($x) -text $x -variable checkboxVal$i -anchor nw -background orange];
+		#set tempCheckbox checkboxValue${i}
+		#set var3 [set $var2]
+		#set t1 checkbox${i}
+		#set t2 $$t1
+		#puts "The value is ${$t1} and ${$t2}"
 		incr i
 		pack $c -side top -anchor nw -fill x -expand false;
 	}
