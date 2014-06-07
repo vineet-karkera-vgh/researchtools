@@ -73,7 +73,10 @@ proc getFirstLineFromFile {filename} {
     return $line
 };
 
-#proc to split the data into columns
+#proc to get arithmetic sum of elements in a list
+proc ladd L {expr [join $L +]+0}
+
+#proc to split the first file data into columns
 proc splitIntoColumns {filename} {
 	global numCols
 	set f [open $filename r]	
@@ -92,6 +95,9 @@ proc splitIntoColumns {filename} {
 			incr i			
 		}
 	}
+	
+	puts "The summation of the first column is [ladd $col0]"
+	
 	#debugging
 	puts "Col : $col0"
 	puts "Col : $col1"
@@ -101,8 +107,36 @@ proc splitIntoColumns {filename} {
 	puts "Col : $col5"
 	puts "Col : $col6"
 	puts "Col : $col7"
-	puts "Col : $col8"
-	puts "Col : $col9"
+};
+
+#proc to split the second file data into columns
+proc splitIntoColns {filename} {
+	global numCols
+	set f [open $filename r]	
+	#the first line containing header names is skipped
+	set line [gets $f]
+	set file_data [read $f]
+	close $f
+	
+	set data [split $file_data "\n"]
+    foreach {line} $data {
+		set csvdata [split $line ","]
+		set i 0
+		foreach {element} $csvdata {
+			global coln$i
+			lappend coln$i $element
+			incr i			
+		}
+	}
+	#debugging
+	puts "Col : $coln0"
+	puts "Col : $coln1"
+	puts "Col : $coln2"
+	puts "Col : $coln3"
+	puts "Col : $coln4"
+	puts "Col : $coln5"
+	puts "Col : $coln6"
+	puts "Col : $coln7"
 };
  
 #proc to open first file
@@ -130,7 +164,7 @@ proc openFile1 {} {
 	splitIntoColumns $myFile;
 	
 	#debugging - vineet - to check if global variables work
-	global col0 col1 col2 col3 col4 col5 col6 col7 col8 col9
+	global col0 col1 col2 col3 col4 col5 col6 col7 col8
 	puts "Col : $col0"
 	puts "Col : $col1"
 	puts "Col : $col2"
@@ -139,8 +173,6 @@ proc openFile1 {} {
 	puts "Col : $col5"
 	puts "Col : $col6"
 	puts "Col : $col7"
-	puts "Col : $col8"
-	puts "Col : $col9"
 	
 	#populates the textarea with new information
 	set i 1
@@ -164,6 +196,9 @@ proc openFile2 {} {
 	puts stdout [format "%s:myFile=<%s>" $fn $myFile]
 
 	set fileID [open $myFile r]
+	
+	#the data is split into individual columns
+	splitIntoColns $myFile;
 	
 	#populates the textarea with new information
 	set i 1
