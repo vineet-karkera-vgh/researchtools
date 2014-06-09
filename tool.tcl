@@ -88,8 +88,8 @@ proc analyze {} {
 	label $analyzeFrame.lbl4 -text "Efficiency -  %" -background orange -compound left 
 	label $analyzeFrame.lbl5 -text "Accuracy -  %" -background orange -compound left 
 	label $analyzeFrame.lbl6 -text "Privacy - %" -background orange -compound left 
-	label $analyzeFrame.lbl7 -text "Misses Cost - $missesCost %" -background orange -compound left 
-	label $analyzeFrame.lbl8 -text "Information Loss - $informationLoss %" -background orange -compound left 
+	label $analyzeFrame.lbl7 -text "Misses Cost - [format "%.2f" $missesCost] %" -background orange -compound left 
+	label $analyzeFrame.lbl8 -text "Information Loss - [format "%.2f" $informationLoss] %" -background orange -compound left 
 	label $analyzeFrame.lbl9 -text "Metric 5 - %" -background orange -compound left 
 	label $analyzeFrame.lbl10 -text "Metric 6 -  %" -background orange -compound left
 	pack $analyzeFrame.lbl4 $analyzeFrame.lbl5 $analyzeFrame.lbl6 $analyzeFrame.lbl7 $analyzeFrame.lbl8 $analyzeFrame.lbl9 $analyzeFrame.lbl10  -padx 20
