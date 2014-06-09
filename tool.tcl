@@ -11,6 +11,10 @@ array set sensitiveArray {}
 #contains default value of checkboxes
 set checkboxValue 0
 
+#default values of metrics
+set missesCost "-"
+set informationLoss "-"
+
 proc setSensitiveArray {} {  
 	# global x colNames 
 	# set i 0
@@ -36,11 +40,41 @@ proc getSensitiveArray {} {
 	}
 };
 
+# calculates misses cost as defined by Oliveira in his paper, discussed further in the report submitted
+proc getMissesCost {} {  
+	global missesCost col1 coln1
+	set count 0
+	foreach a $col1 b $coln1 {
+		if { $a == $b } {
+			incr count
+		} 
+	}
+	set missesCost [expr (($count * 100.00 )/ [llength $col1])]
+};
+
+# calculates information loss as defined by Oliveira in his paper, discussed further in the report submitted
+proc getInformationLoss {} {  
+	global informationLoss col1 coln1
+	set count 0
+	foreach a $col1 b $coln1 {
+		if { $a != $b } {
+			incr count
+		} 
+	}
+	set informationLoss [expr (($count * 100.00 )/ [llength $col1])]
+};
+
 proc analyze {} {  
-	global analyzeFrame welcomeFrame
+	global analyzeFrame welcomeFrame missesCost informationLoss
 	set analyzeFrame ".analyzeFrame";
 	
 	getSensitiveArray;
+	
+	#computes misses cost
+	getMissesCost;
+	
+	#computes information loss
+	getInformationLoss;
 	
 	
 	if {[winfo exists $analyzeFrame]} { destroy $analyzeFrame };
@@ -51,13 +85,13 @@ proc analyze {} {
 	
 	#widgets in the window
 	#widget - list of metrics
-	label $analyzeFrame.lbl4 -text "Efficiency  %" -background orange -compound left 
-	label $analyzeFrame.lbl5 -text "Accuracy  %" -background orange -compound left 
-	label $analyzeFrame.lbl6 -text "Privacy  %" -background orange -compound left 
-	label $analyzeFrame.lbl7 -text "Metric 3" -background orange -compound left 
-	label $analyzeFrame.lbl8 -text "Metric 4" -background orange -compound left 
-	label $analyzeFrame.lbl9 -text "Metric 5" -background orange -compound left 
-	label $analyzeFrame.lbl10 -text "Metric 6" -background orange -compound left
+	label $analyzeFrame.lbl4 -text "Efficiency -  %" -background orange -compound left 
+	label $analyzeFrame.lbl5 -text "Accuracy -  %" -background orange -compound left 
+	label $analyzeFrame.lbl6 -text "Privacy - %" -background orange -compound left 
+	label $analyzeFrame.lbl7 -text "Misses Cost - $missesCost %" -background orange -compound left 
+	label $analyzeFrame.lbl8 -text "Information Loss - $informationLoss %" -background orange -compound left 
+	label $analyzeFrame.lbl9 -text "Metric 5 - %" -background orange -compound left 
+	label $analyzeFrame.lbl10 -text "Metric 6 -  %" -background orange -compound left
 	pack $analyzeFrame.lbl4 $analyzeFrame.lbl5 $analyzeFrame.lbl6 $analyzeFrame.lbl7 $analyzeFrame.lbl8 $analyzeFrame.lbl9 $analyzeFrame.lbl10  -padx 20
  
 	#destroy previous frame and packs the new frame
