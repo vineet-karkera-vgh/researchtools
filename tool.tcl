@@ -6,39 +6,12 @@ package require Tk
 set colNames ""
 #contains the delimiter, default set to comma
 set delimiter ","
-#contains an array with key value pair of columns that are privacy sensitive
-array set sensitiveArray {}
 #contains default value of checkboxes
 set checkboxValue 0
 
 #default values of metrics
 set missesCost "-"
 set informationLoss "-"
-
-proc setSensitiveArray {} {  
-	# global x colNames 
-	# set i 0
-	# foreach var $colNames {
-	# set temp1 $var$i
-	# set temp2 [set $temp1]
-	# puts "ahem $temp1 and $temp2"
-    # if {[info exists $var${i}]} {
-			# puts "$var$i does indeed exist"
-		# } else {
-			# puts "$var sadly does not exist"
-		# }
-		# incr i
-	# }
-	# puts "The value of the column is $x"
-	
-};
-
-proc getSensitiveArray {} {  
-	global sensitiveArray
-	foreach {key value} [array get sensitiveArray] {
-		puts "Key: $key Value: $value" 
-	}
-};
 
 # calculates misses cost as defined by Oliveira in his paper, discussed further in the report submitted
 proc getMissesCost {} {  
@@ -67,8 +40,6 @@ proc getInformationLoss {} {
 proc analyze {} {  
 	global analyzeFrame welcomeFrame missesCost informationLoss
 	set analyzeFrame ".analyzeFrame";
-	
-	getSensitiveArray;
 	
 	#computes misses cost
 	getMissesCost;
@@ -248,7 +219,7 @@ proc openFile2 {} {
 
 #Selecting the columns with sensitive information
 proc gotoFourthStep {} {	
-	global colNames welcomeFrame fourthFrame sensitiveArray
+	global colNames welcomeFrame fourthFrame
 	set fourthFrame ".fourthFrame";
 	if {[winfo exists $fourthFrame]} { destroy $fourthFrame };
 	frame $fourthFrame -borderwidth 10 -background orange;
@@ -265,7 +236,7 @@ proc gotoFourthStep {} {
 	# #widget - checkbox
 	global x
 	foreach x $colNames {
-		#global checkboxValue$i
+		global checkboxValue$i
 		#set c [checkbutton $fourthFrame.checkbox$x -text $x -variable checkboxValue$i -anchor nw -background orange -command [setSensitiveArray]];
 		#set c [checkbutton $fourthFrame.checkbox($x) -text $x -variable checkboxVal$i -anchor nw -background orange -command [puts [expr $checkboxVal${i}]]];
 		set c [checkbutton $fourthFrame.checkbox($x) -text $x -variable checkboxVal$i -anchor nw -background orange];
