@@ -6,12 +6,46 @@ package require Tk
 set colNames ""
 #contains the delimiter, default set to comma
 set delimiter ","
-#contains default value of checkboxes
+#contains default value of sensitive checkboxes
 set checkboxValue 0
 
 #default values of metrics
 set missesCost "-"
 set informationLoss "-"
+
+# initialize number of elements
+set sensitiveElementDifference 0
+set nonSensitiveElementDifference 0
+set numberOfSensitiveElements 0
+set numberOfNonSensitiveElements 0
+
+# calculates misses cost as defined by Oliveira in his paper, discussed further in the report submitted
+proc checkEachElement {col1 coln1} {  
+	global sensitiveElementDifference nonSensitiveElementDifference numberOfSensitiveElements numberOfNonSensitiveElements
+	#check if the length of both columns are the same
+	if {[llength $col1] == [llength $coln1]} {
+			foreach elem1 $col1 elem2 $coln1 {
+				incr numberOfSensitiveElements
+				#compares each element of the two columns
+				if {$elem1 != $elem2} {
+					incr sensitiveElementDifference
+				}
+			}
+	}
+	#do a check if the column is non-sensitive
+	#check is the length of both columns are the same
+	if {[llength $col1] == [llength $coln1]} {
+			foreach elem1 $col1 elem2 $coln1 {
+				incr numberOfNonSensitiveElements
+				#compares each element of the two columns
+				if {$elem1 != $elem2} {
+					incr nonSensitiveElementDifference
+				}
+			}
+	}
+	puts "nonSensitiveElementDifference =$sensitiveElementDifference sensitiveElementDifference = $sensitiveElementDifference numberOfSensitiveElements=$numberOfSensitiveElements numberOfNonSensitiveElements=$numberOfNonSensitiveElements"
+};
+
 
 # calculates misses cost as defined by Oliveira in his paper, discussed further in the report submitted
 proc getMissesCost {} {  
@@ -38,7 +72,7 @@ proc getInformationLoss {} {
 };
 
 proc analyze {} {  
-	global analyzeFrame welcomeFrame missesCost informationLoss
+	global col1 coln1 analyzeFrame welcomeFrame missesCost informationLoss
 	set analyzeFrame ".analyzeFrame";
 	
 	#computes misses cost
@@ -46,6 +80,8 @@ proc analyze {} {
 	
 	#computes information loss
 	getInformationLoss;
+	
+	checkEachElement $col1 $coln1;
 	
 	
 	if {[winfo exists $analyzeFrame]} { destroy $analyzeFrame };
