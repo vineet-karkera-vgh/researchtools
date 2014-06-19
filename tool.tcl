@@ -1,3 +1,4 @@
+#!/usr/bin/env tclsh
 #Author: Vineet Karkera
 package require Tk
 
