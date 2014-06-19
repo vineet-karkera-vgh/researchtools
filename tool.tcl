@@ -13,6 +13,7 @@ set checkboxValue 0
 #default values of metrics
 set missesCost 0.0
 set informationLoss 0.0
+set hidingFailure 0.0
 
 # initialize number of elements
 set sensitiveElementDifference 0
@@ -48,10 +49,26 @@ proc checkEachElement {col1 coln1} {
 };
 
 
-# calculates misses cost as defined by Oliveira in his paper, discussed further in the report submitted
+# calculates PRIVACY (hiding failure) as defined by Oliveira in his paper, discussed further in the report submitted
+proc getHidingFailure {} {  
+	#find the number of sensitive elements that have been revealed
+	global hidingFailure col1 coln1
+	set count 0
+	#check if the column is sensitive only then
+	foreach a $col1 b $coln1 {
+		if { $a == $b } {
+			incr count
+		} 
+	}
+	set hidingFailure [expr (($count * 100.00 )/ [llength $col1])]
+};
+
+# calculates UTILITY (misses cost) as defined by Oliveira in his paper, discussed further in the report submitted
 proc getMissesCost {} {  
 	global missesCost col1 coln1
+	#misses cost measures the percentage of non-restrictive patterns that are hidden after sanitization
 	set count 0
+	#check if the column is non-sensitive only then
 	foreach a $col1 b $coln1 {
 		if { $a == $b } {
 			incr count
@@ -60,7 +77,7 @@ proc getMissesCost {} {
 	set missesCost [expr (($count * 100.00 )/ [llength $col1])]
 };
 
-# calculates information loss as defined by Oliveira in his paper, discussed further in the report submitted
+# calculates ACCURACY OR DATA QUALLITY(information loss) as defined by Oliveira in his paper, discussed further in the report submitted
 proc getInformationLoss {} {  
 	global informationLoss col1 coln1
 	set count 0
@@ -73,14 +90,18 @@ proc getInformationLoss {} {
 };
 
 proc analyze {} {  
-	global col1 coln1 analyzeFrame welcomeFrame missesCost informationLoss
+	global col1 coln1 analyzeFrame welcomeFrame missesCost hidingFailure
 	set analyzeFrame ".analyzeFrame";
+	set resultsFrame ".resultsFrame";
 	
 	#computes misses cost
 	getMissesCost;
 	
 	#computes information loss
 	getInformationLoss;
+	
+	#computes hiding Failure
+	getHidingFailure;
 	
 	#compares each element of the two lists passed
 	checkEachElement $col1 $coln1;
@@ -90,24 +111,28 @@ proc analyze {} {
 	frame $analyzeFrame -borderwidth 10 -background orange;
 	
 	#pack the welcome frame
-	pack $welcomeFrame -side top -expand true -fill both 
+	pack $welcomeFrame -side top -expand true -fill both
+	
+	if {[winfo exists $resultsFrame]} { destroy $resultsFrame };
+	frame $resultsFrame -borderwidth 10 -background orange;
 	
 	#widgets in the window
-	#widget - list of metrics
-	label $analyzeFrame.lbl4 -text "Efficiency -  %" -background orange -compound left 
-	label $analyzeFrame.lbl5 -text "Accuracy -  %" -background orange -compound left 
-	label $analyzeFrame.lbl6 -text "Privacy - %" -background orange -compound left 
-	label $analyzeFrame.lbl7 -text "Misses Cost - [format "%.2f" $missesCost] %" -background orange -compound left 
-	label $analyzeFrame.lbl8 -text "Information Loss - [format "%.2f" $informationLoss] %" -background orange -compound left 
-	label $analyzeFrame.lbl9 -text "Metric 5 - %" -background orange -compound left 
-	label $analyzeFrame.lbl10 -text "Metric 6 -  %" -background orange -compound left
-	pack $analyzeFrame.lbl4 $analyzeFrame.lbl5 $analyzeFrame.lbl6 $analyzeFrame.lbl7 $analyzeFrame.lbl8 $analyzeFrame.lbl9 $analyzeFrame.lbl10  -padx 20
+	label $resultsFrame.lbl10 -text "Analysis and Results" -background orange -compound left -font {Helvetica 14} 
+	label $resultsFrame.lbl11 -text "Hiding Failure (HF) is the percentage of sensitive information that can still be effectively discovered after sanitizing the data" -background orange -compound left -font {Times 10}
+	label $resultsFrame.lbl12 -text "Misses cost (MC) measures the percentage of non-sensitive information that is hidden after the sanitization process." -background orange -compound left -font {Times 10}
+	label $resultsFrame.lbl13 -text "PRIVACY (hiding failure) and UTILITY (misses cost) is calculated as defined by Oliveira in his paper." -background orange -compound left -font {Times 10}
+	pack $resultsFrame.lbl10 $resultsFrame.lbl13 $resultsFrame.lbl11 $resultsFrame.lbl12  -expand true -fill both -padx 10 -pady 10 -side top
 	
-	puts "Misses cost : $missesCost  $informationLoss"
+	#widget - list of metrics
+	label $analyzeFrame.lbl7 -text "Hiding Failure - [format "%.2f" $hidingFailure] %" -background orange -compound left 
+	label $analyzeFrame.lbl8 -text "Misses Cost - [format "%.2f" $missesCost] %" -background orange -compound left  
+	pack $analyzeFrame.lbl7 $analyzeFrame.lbl8 -padx 20 -side left -expand true -fill both
  
 	#destroy previous frame and packs the new frame
 	if {[winfo exists .fourthFrame]} { destroy .fourthFrame };
-	pack $analyzeFrame -side top -expand true -fill both
+	pack $resultsFrame -expand true -fill both -side top
+	pack $analyzeFrame -side left -expand true -fill both
+	
 	
 	#call proc to draw bar chart with calculated values
 	createBarChart;
@@ -211,7 +236,7 @@ proc openFile1 {} {
 	#the data is split into individual columns
 	splitIntoColumns $myFile;
 	
-	#debugging - vineet - to check if global variables work
+	#debugging - to check if global variables work
 	global col0 col1 col2 col3 col4 col5 col6 col7 col8
 	puts "Col : $col0"
 	puts "Col : $col1"
@@ -276,13 +301,12 @@ proc gotoFourthStep {} {
 	pack $fourthFrame.lblColumns  -padx 20
 	
 	set i 0
-	# #widget - checkbox
-	global x
+	#widget - checkbox
 	foreach x $colNames {
-		global checkboxValue$i
+		global checkboxVal$i
 		#set c [checkbutton $fourthFrame.checkbox$x -text $x -variable checkboxValue$i -anchor nw -background orange -command [setSensitiveArray]];
 		#set c [checkbutton $fourthFrame.checkbox($x) -text $x -variable checkboxVal$i -anchor nw -background orange -command [puts [expr $checkboxVal${i}]]];
-		set c [checkbutton $fourthFrame.checkbox($x) -text $x -variable checkboxVal$i -anchor nw -background orange];
+		set c [checkbutton $fourthFrame.checkbox($i) -text $x -variable checkboxVal$i -anchor nw -background orange];
 		#set tempCheckbox checkboxValue${i}
 		#set var3 [set $var2]
 		#set t1 checkbox${i}
@@ -291,7 +315,7 @@ proc gotoFourthStep {} {
 		incr i
 		pack $c -side top -anchor nw -fill x -expand false;
 	}
-	
+
 	#widget - next step button
 	button $fourthFrame.nextStep -text "Final Step - Analyze" -background lightgrey -command {analyze}
 	pack $fourthFrame.nextStep -padx 20 -pady 20
@@ -458,7 +482,7 @@ $File add command -label {Open File 2 (Sample output file)} -command openFile2
 $Quit add command -label {Yes, I want to leave!} -command exit
 $Quit add command -label {No, I'll stay.}
 
-#barchart - start
+#start of barchart code
 proc 3drect {w args} {
     if [string is int -strict [lindex $args 1]] {
         set coords [lrange $args 0 3]
@@ -478,42 +502,28 @@ proc 3drect {w args} {
     $w create poly $x1 $y1 $x3 $y3 $x3 $y2 $x1 $y0 -outline black -tag $tag
 }
 
-proc yscale {w x0 y0 y1 min max} {
-   set dy   [expr {$y1-$y0}]
-   regexp {([1-9]+)} $max -> prefix
-   set stepy [expr {1.*$dy/$prefix}]
-   set step [expr {$max/$prefix}]
-   set y $y0
-   set label $max
-   while {$label>=$min} {
-       $w create text $x0 $y -text $label -anchor w
-       set y [expr {$y+$stepy}]
-       set label [expr {$label-$step}]
-   }
-   expr {$dy/double($max)}
-}
-
-proc bars {w x0 y0 x1 y1 data} {
+proc bars {w data} {
     set vals 0 
 	set high 100
 	set low 0
-    foreach bar $data {
+    set x0 40
+	set y0 50 
+	set x1 240 
+	set y1 230 
+	foreach bar $data {
         lappend vals [lindex $bar 1]
     }
-    puts "hello"
-	set f [yscale $w $x0 $y0 $y1 $low $high]
-	puts "value of f is $f"
+	set f 2.1
     set x [expr $x0+30]
     set dx [expr ($x1-$x0-$x)/[llength $data]]
     set y3 [expr $y1-20]
     set y4 [expr $y1+10]
-    $w create poly $x0 $y4 [expr $x0+30] $y3  $x1 $y3 [expr $x1-20] $y4 -fill gray60
+    $w create poly $x0 $y4 [expr $x0+30] $y3  $x1 $y3 [expr $x1-20] $y4 -fill gray65
     set dxw [expr $dx*6/10]
     foreach bar $data {
         foreach {txt val col} $bar break
         set y [expr {round($y1-($val*$f))}]
         set y1a $y1
-        if {$y>$y1a} {swap y y1a}
         set tag [expr {$val<0? "d": ""}]
         3drect $w $x $y [expr $x+$dxw] $y1a -fill $col -tag $tag
         $w create text [expr {$x+25}] [expr {$y-18}] -text $val
@@ -523,41 +533,16 @@ proc bars {w x0 y0 x1 y1 data} {
     $w lower d
 }
 
-
-proc max list {
-    set res [lindex $list 0]
-    foreach e [lrange $list 1 end] {
-        if {$e>$res} {set res $e}
-    }
-    set res
-}
-proc min list {
-    set res [lindex $list 0]
-    foreach e [lrange $list 1 end] {
-        if {$e<$res} {set res $e}
-    }
-    set res
-}
-proc swap {_a _b} {
-    upvar 1 $_a a $_b b
-    foreach {a b} [list $b $a] break
-}
-
 proc createBarChart {} {
-	global missesCost informationLoss
+	global missesCost hidingFailure
 		
 	#destroy previous frame and packs the new frame
 	if {[winfo exists .fourthFrame]} { destroy .fourthFrame };
-	pack [canvas .c -width 240 -height 280  -background orange -highlightthickness 0] -side top -expand true -fill both	
-	bars .c 10 20 240 230 "
-			{{Misses Cost} [format "%.2f" $missesCost] red}
-			{{Information Loss} [format "%.2f" $informationLoss] yellow}
-			{{Hiding Failure} 20 blue}
-			{Privacy 3 blue}
-			{Privacy 45 blue}
-			{Privacy 60 blue}
-			{Privacy 12 blue}
+	pack [canvas .c -width 240 -height 280  -background orange -highlightthickness 0] -side left -expand true -fill both	
+	bars .c "
+			{{HF} [format "%.2f" $hidingFailure] red}
+			{{MC} [format "%.2f" $missesCost] yellow}
 		"
-	.c create text 120 10 -anchor nw -text "Results of Analysis"
+	.c create text 120 10 -anchor nw -text "Bar Chart"
 }
-#barchart - end
+#end of barchart code
