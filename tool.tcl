@@ -11,8 +11,8 @@ set delimiter ","
 set checkboxValue 0
 
 #default values of metrics
-set missesCost "-"
-set informationLoss "-"
+set missesCost 0.0
+set informationLoss 0.0
 
 # initialize number of elements
 set sensitiveElementDifference 0
@@ -82,6 +82,7 @@ proc analyze {} {
 	#computes information loss
 	getInformationLoss;
 	
+	#compares each element of the two lists passed
 	checkEachElement $col1 $coln1;
 	
 	
@@ -89,7 +90,7 @@ proc analyze {} {
 	frame $analyzeFrame -borderwidth 10 -background orange;
 	
 	#pack the welcome frame
-	pack $::welcomeFrame -side top -expand true -fill both 
+	pack $welcomeFrame -side top -expand true -fill both 
 	
 	#widgets in the window
 	#widget - list of metrics
@@ -101,10 +102,15 @@ proc analyze {} {
 	label $analyzeFrame.lbl9 -text "Metric 5 - %" -background orange -compound left 
 	label $analyzeFrame.lbl10 -text "Metric 6 -  %" -background orange -compound left
 	pack $analyzeFrame.lbl4 $analyzeFrame.lbl5 $analyzeFrame.lbl6 $analyzeFrame.lbl7 $analyzeFrame.lbl8 $analyzeFrame.lbl9 $analyzeFrame.lbl10  -padx 20
+	
+	puts "Misses cost : $missesCost  $informationLoss"
  
 	#destroy previous frame and packs the new frame
 	if {[winfo exists .fourthFrame]} { destroy .fourthFrame };
 	pack $analyzeFrame -side top -expand true -fill both
+	
+	#call proc to draw bar chart with calculated values
+	createBarChart;
 };
 
 #proc to get the first line of the file
@@ -451,3 +457,107 @@ $File add command -label {Open File 2 (Sample output file)} -command openFile2
 #options for the second drop down
 $Quit add command -label {Yes, I want to leave!} -command exit
 $Quit add command -label {No, I'll stay.}
+
+#barchart - start
+proc 3drect {w args} {
+    if [string is int -strict [lindex $args 1]] {
+        set coords [lrange $args 0 3]
+    } else {
+        set coords [lindex $args 0]
+    }
+    foreach {x0 y0 x1 y1} $coords break
+    set d [expr {($x1-$x0)/3}]
+    set x2 [expr {$x0+$d+1}]
+    set x3 [expr {$x1+$d}]
+    set y2 [expr {$y0-$d+1}]
+    set y3 [expr {$y1-$d-1}]
+    set id [eval [list $w create rect] $args]
+    set fill [$w itemcget $id -fill]
+    set tag [$w gettags $id]
+    $w create poly $x0 $y0 $x2 $y2 $x3 $y2 $x1 $y0 -outline black
+    $w create poly $x1 $y1 $x3 $y3 $x3 $y2 $x1 $y0 -outline black -tag $tag
+}
+
+proc yscale {w x0 y0 y1 min max} {
+   set dy   [expr {$y1-$y0}]
+   regexp {([1-9]+)} $max -> prefix
+   set stepy [expr {1.*$dy/$prefix}]
+   set step [expr {$max/$prefix}]
+   set y $y0
+   set label $max
+   while {$label>=$min} {
+       $w create text $x0 $y -text $label -anchor w
+       set y [expr {$y+$stepy}]
+       set label [expr {$label-$step}]
+   }
+   expr {$dy/double($max)}
+}
+
+proc bars {w x0 y0 x1 y1 data} {
+    set vals 0 
+	set high 100
+	set low 0
+    foreach bar $data {
+        lappend vals [lindex $bar 1]
+    }
+    puts "hello"
+	set f [yscale $w $x0 $y0 $y1 $low $high]
+	puts "value of f is $f"
+    set x [expr $x0+30]
+    set dx [expr ($x1-$x0-$x)/[llength $data]]
+    set y3 [expr $y1-20]
+    set y4 [expr $y1+10]
+    $w create poly $x0 $y4 [expr $x0+30] $y3  $x1 $y3 [expr $x1-20] $y4 -fill gray60
+    set dxw [expr $dx*6/10]
+    foreach bar $data {
+        foreach {txt val col} $bar break
+        set y [expr {round($y1-($val*$f))}]
+        set y1a $y1
+        if {$y>$y1a} {swap y y1a}
+        set tag [expr {$val<0? "d": ""}]
+        3drect $w $x $y [expr $x+$dxw] $y1a -fill $col -tag $tag
+        $w create text [expr {$x+25}] [expr {$y-18}] -text $val
+        $w create text [expr {$x+12}] [expr {$y1a+2}] -text $txt -anchor n
+        incr x $dx
+    }
+    $w lower d
+}
+
+
+proc max list {
+    set res [lindex $list 0]
+    foreach e [lrange $list 1 end] {
+        if {$e>$res} {set res $e}
+    }
+    set res
+}
+proc min list {
+    set res [lindex $list 0]
+    foreach e [lrange $list 1 end] {
+        if {$e<$res} {set res $e}
+    }
+    set res
+}
+proc swap {_a _b} {
+    upvar 1 $_a a $_b b
+    foreach {a b} [list $b $a] break
+}
+
+proc createBarChart {} {
+	global missesCost informationLoss
+		
+	#destroy previous frame and packs the new frame
+	if {[winfo exists .fourthFrame]} { destroy .fourthFrame };
+	pack [canvas .c -width 240 -height 280  -background orange -highlightthickness 0] -side top -expand true -fill both	
+	bars .c 10 20 240 230 "
+			{{Misses Cost} [format "%.2f" $missesCost] red}
+			{{Information Loss} [format "%.2f" $informationLoss] yellow}
+			{{Hiding Failure} 20 blue}
+			{Privacy 3 blue}
+			{Privacy 45 blue}
+			{Privacy 60 blue}
+			{Privacy 12 blue}
+		"
+	.c create text 120 10 -anchor nw -text "Results of Analysis"
+}
+#barchart - end
