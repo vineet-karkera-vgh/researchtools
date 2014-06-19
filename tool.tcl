@@ -147,7 +147,7 @@ proc splitIntoColns {filename} {
 #proc to open first file
 proc openFile1 {} {
 	set fn "openFile1"
-	global f colNames numCols
+	global t colNames numCols
 
 	set myFile [tk_getOpenFile]
 
@@ -181,10 +181,10 @@ proc openFile1 {} {
 	
 	#populates the textarea with new information
 	set i 1
-	$f.text1 delete 1.0 end
+	$t.text1 delete 1.0 end
 	while { [gets $fileID line] >= 0 } {
 		puts stdout [format "line(%d)=%s" $i $line]
-		$f.text1 insert end [format "%s\n" $line]
+		$t.text1 insert end [format "%s\n" $line]
 		incr i
 		} ;
 
@@ -194,7 +194,7 @@ proc openFile1 {} {
 # proc to open second file
 proc openFile2 {} {
 	set fn "openFile2"
-	global secondFrame
+	global t
 
 	set myFile [tk_getOpenFile]
 
@@ -207,10 +207,10 @@ proc openFile2 {} {
 	
 	#populates the textarea with new information
 	set i 1
-	$secondFrame.text2 delete 1.0 end
+	$t.text2 delete 1.0 end
 	while { [gets $fileID line] >= 0 } {
 		puts stdout [format "line(%d)=%s" $i $line]
-		$secondFrame.text2 insert end [format "%s\n" $line]
+		$t.text2 insert end [format "%s\n" $line]
 		incr i
 		} ;
 
@@ -281,8 +281,11 @@ proc gotoThirdStep {} {
 	button $thirdFrame.nextStep -text "Next Step ->" -background lightgrey -command {gotoFourthStep}
 	pack $thirdFrame.nextStep -padx 20 -pady 20
 	
-	#destroy previous frame and pack new frame
-	if {[winfo exists .secondFrame]} { destroy .secondFrame };
+	#destroy previous frames and pack new frame
+	if {[winfo exists .myArea]} { destroy .myArea };
+	if {[winfo exists .browseButtonFrame]} { destroy .browseButtonFrame };
+	if {[winfo exists .textAreaFrame]} { destroy .textAreaFrame };
+	if {[winfo exists .nextButtonFrame]} { destroy .nextButtonFrame };
 	pack $thirdFrame -side top -expand true -fill both
 }
 
@@ -298,7 +301,7 @@ proc gotoSecondStep {} {
 	
 	#widgets in the window
 	#widget - upload file label
-	label $secondFrame.lbl3 -text "Step 2 : Upload Output File" -background orange -compound left 
+	label $secondFrame.lbl3 -text "Step 2 : Upload Sanitized File" -background orange -compound left 
 	pack $secondFrame.lbl3  -padx 20
 
 	#widget - Browse button
@@ -323,13 +326,17 @@ proc gotoSecondStep {} {
 }
 
 #setting up window
-wm geometry . "350x600+10+10"
+wm geometry . "700x600+10+10"
 wm title . "Privacy Preserving Algorithm Analysis Tool"
 
-#setting up the frame stuff
-destroy .myArea
+#setting up frame stuff
+#splitting widgets into several frames in order to display them well
+destroy .myArea .welcomeFrame .b .t .n .f
 set f [frame .myArea -borderwidth 10 -background orange]
 set welcomeFrame [frame .welcomeFrame -borderwidth 10 -background orange]
+set b [frame .browseButtonFrame -borderwidth 10 -background orange]
+set t [frame .textAreaFrame -borderwidth 10 -background orange]
+set n [frame .nextButtonFrame -borderwidth 10 -background orange]
 
 #widgets in the window
 #widget - name of tool
@@ -343,27 +350,50 @@ pack $welcomeFrame.border2 -padx 20 -pady 5
 #pack the welcome frame
 pack $welcomeFrame -side top -expand true -fill both 
 
-#widget - upload file label
-label $f.lbl2 -text "Step 1 : Upload Input File" -background orange -compound left 
-pack $f.lbl2  -padx 20
+#widget - upload first file label
+label $f.lbl2 -text "Step 1 : Upload File before Sanitization" -background orange -compound left 
+#widget - upload sanitized file label
+label $f.lbl3 -text "Step 2 : Upload Sanitized File" -background orange -compound left 
+pack $f.lbl2 -padx 50 -side left
+pack $f.lbl3  -padx 100 -side left
 
-#widget - Browse button
-button $f.browse1 -text "Browse" -background lightgrey -command {openFile1}
-pack $f.browse1  -padx 20
+#widget - Browse button for first file
+button $b.browse1 -text "Browse" -background lightgrey -command {openFile1}
+#widget - Browse button for second file
+button $b.browse2 -text "Browse" -background lightgrey -command {openFile2}
 
-text $f.text1 -bd 2 -bg white -height 7
-pack $f.text1 -padx 20 -pady 5
+pack $b.browse1 -padx 120 -side left 
+pack $b.browse2 -padx 170 -side left 
+
+#widget - textArea
+text $t.text1 -bd 2 -bg white -height 15 -width 40
+text $t.text2 -bd 2 -bg white -height 15 -width 40
+pack $t.text1 -padx 10 -pady 5 -side left
+pack $t.text2 -padx 10 -pady 5 -side left
 
 #widget - next step button
-button $f.nextStep -text "Next Step ->" -background lightgrey -command {gotoSecondStep}
-pack $f.nextStep -padx 20 -pady 20
+button $n.nextStep -text "Next Step ->" -background lightgrey -command {gotoThirdStep} -padx 15
+pack $n.nextStep -padx 20 -pady 20 
 
-#pack the entire first frame
+#pack the entire frame containing labels
 pack $f -side top -expand true -fill both 
 
-# lines within the text area
-$f.text1 insert end "Please upload a csv file from the menu\n" tag0
-$f.text1 insert end "Or use the Browse button above...." tag1
+#pack the entire frame containing browse buttons
+pack $b -side top -expand true -fill both 
+
+#pack the entire frame containing textareas
+pack $t -side top -expand true -fill both 
+
+#pack the entire frame containing button to go the next screen
+pack $n -side top -expand true -fill both 
+
+# lines within first text area box
+$t.text1 insert end "Please upload a csv file from the menu\n" tag0
+$t.text1 insert end "Or use the Browse button above...." tag1
+
+# lines within the second text area box
+$t.text2 insert end "Please upload a csv file from the menu\n" tag0
+$t.text2 insert end "Or use the Browse button above.." tag1
 
 #creates a menubar
 menu .menubar
