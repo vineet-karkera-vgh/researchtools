@@ -82,7 +82,7 @@ proc getMissesCost {} {
 	set count 0
 	#check if the column is non-sensitive only then
 	foreach a $col1 b $coln1 {
-		if { $a == $b } {
+		if { $a != $b } {
 			incr count
 		} 
 	}
@@ -196,12 +196,13 @@ proc splitIntoColumns {filename} {
 
 #proc to split the second file data into columns
 proc splitIntoColns {filename} {
-	global numCols
+	global numCols delimiter
 	set f [open $filename r]	
 	#the first line containing header names is skipped
 	set line [gets $f]
 	set file_data [read $f]
 	close $f
+	
 	
 	set data [split $file_data "\n"]
     foreach {line} $data {
@@ -326,7 +327,6 @@ proc gotoFourthStep {} {
 		#set t1 checkbox${i}
 		#set t2 $$t1
 		#puts "The value is ${$t1} and ${$t2}"
-		puts "Vineet - = $checkboxVal0"
 		
 		
 		incr i
@@ -344,7 +344,7 @@ proc gotoFourthStep {} {
 
 #selecting the delimiter
 proc gotoThirdStep {} {
-	global thirdFrame welcomeFrame
+	global thirdFrame welcomeFrame delimiter
 	set thirdFrame ".thirdFrame";
 	if {[winfo exists $thirdFrame]} { destroy $thirdFrame };
 	frame $thirdFrame -borderwidth 10 -background orange;
@@ -360,6 +360,12 @@ proc gotoThirdStep {} {
 	#widget - delimiter entry field
 	entry $thirdFrame.entryDelimiter -width 10 -bd 2 -textvariable delimiter
 	pack $thirdFrame.entryDelimiter  -padx 20
+	
+	
+	set ask [.thirdFrame.entryDelimiter get]
+	
+	puts "Value of delimiter is $ask"
+	
 	
 	#widget - next step button
 	button $thirdFrame.nextStep -text "Next Step ->" -background lightgrey -command {gotoFourthStep}
