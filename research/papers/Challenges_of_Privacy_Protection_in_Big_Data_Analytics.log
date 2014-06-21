@@ -1,0 +1,15 @@
+KEY POINTS :
+1) Given a sufﬁcient dataset as basis, almost every single user of online services can be identiﬁed, leading to neatly tailored online services being provided
+   to each individual. [1]
+2) This paper, classifies data analysis into Verification, Identification and Priori.
+		Verification, is when a data analyst intentionally shapes the data-set to a representation that best possibly provides the requested answer. 
+		Identification, is when the data analyst gathers a large data-set, potentially from multiple sources, and tries to identify interesting facts hidden
+	within the data-set.
+		Lastly, Priori is when the data analyst has little or no information about interesting aspects of the dataset, but hopes to stumble over interesting
+	statistical inferences.
+3) Using an example of the AOL data attack in 2006, categorizes the attack into three sub-categories, namely Correlation attacks, Arbitrary Identiﬁcation attacks,
+	and Targeted identiﬁcation attacks.
+
+REFERENCES :
+[1] “Challenges of Privacy Protection in Big Data Analytics”, by Meiko Jensen, Independent Centre for Privacy Protection Schleswig-Holstein (ULD) Kiel, Germany, 2013 IEEE International Congress on Big Data.
+[2] "A Discussion of Privacy Challenges in User Proﬁling with Big Data Techniques: The EEXCESS Use Case" by Omar Hasan, Benjamin Habegger, Lionel Brunie, Nadia Bennani, Ernesto Damiani, University of Lyon, CNRS, INSA-Lyon, France; Department of Computer Technology, University of Milan, Italy.
