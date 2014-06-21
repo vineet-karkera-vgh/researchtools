@@ -1,0 +1,12 @@
+
+KEY POINTS :
+1. A term called, bucketization is introduced, where-in two tables are formed, called the QI (quasi-identifier) table containing the QI attributes and a sensitive table containing the sensitive attributes. These two tables collectively form the anonymized dataset.
+2. The privacy preserving models such as t-closeness, l-diversity, k-anonymity etc are all forms of bucketization as they are group based anonymization. [1]
+3.       Privacy preserving techniques such as l-diversity, t- closeness, (k,e)-anonymity and m-conﬁdentiality adopt an assumption of random worlds. The paper mentions that these privacy preserving models, apart from background attacks, are also vulnerable to foreground attacks, which involves acquiring a more complete model of the weighted possible worlds.  [1]
+       With analysis of an anonymized table, one can boil down to a higher probability (or weight) of one certain possible world (scenario) over another.
+4. This paper makes us aware of another form of attack, the foreground attack, and compares the behavior of current leading privacy preserving models to this attack.
+
+
+REFERENCES :
+[1] “Can the Utility of Anonymized Data be used for Privacy Breaches?” by Raymond Chi-Wing Wong, Ada Wai-Chee Fu, Ke Wang, Philip S. Yu and Jian Pei, The Hong Kong University of Science and Technology, The Chinese University of Hong Kong, Simon Fraser University, University of Illinois at Chicago.
+[2] “(α, k)-Anonymity: An Enhanced k-Anonymity Model for Privacy-Preserving Data Publishing” by Raymond Chi-Wing Wong,  Ada Wai-Chee Fu, Department of Computer Science and Engineering, The Chinese University of Hong Kong; Jiuyong Li Ada, Departtment of Mathematics and Computing, The University of Southern Queensland;  Ke Wang, Department of Computer Science,  Simon Fraser University, Canada.- https://www.cs.sfu.ca/~wangk/pub/alpha.pdf
