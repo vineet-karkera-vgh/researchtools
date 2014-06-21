@@ -1,0 +1,51 @@
+KEY POINTS : 
+
+1) An important aspect in the design of privacy preserving algorithms is the identiﬁcation of suitable evaluation criteria and the development of
+   related benchmarks. [1]
+2) This paper introduces different approaches used in evaluating the effectiveness of privacy preserving data mining algorithms.
+3) Privacy Preserving metrics in this paper are classified into -
+		Metrics for Quantifying Privacy Level
+		Metrics for Quantifying Hiding Failure
+		Metrics for Quantifying Data Quality
+		Complexity Metrics
+4) "PPDM algorithms can be classiﬁed into two main categories: heuristic-based approaches and cryptography-based approaches. Heuristic-based approaches
+   mainly include four sub-categories: additive noise, multiplicative noise, k-anonymization and statistical disclosure control based approaches." [1]
+5) Each PPDM algorithm have their own way to measure the level of privacy.
+6) Many additive-noise-based PPDM algorithms measure privacy by a likelihood estimate or probability with which the user’s distorted entries can be 4
+   reconstructed.
+7) Bertino et all et all in "A framework for evaluating privacy preserving data mining algorithms."[2] introduces a universal measure of privacy level 
+   based on information entropy. 
+8) In multiplicative noise based perturbation techniques, the privacy is measured as the variance difference between the actual and the perturbed values.
+   The measure is given by Var(X −Y), where X represents a single original attribute and Y the distorted attribute.
+9) The privacy level in Statistical-Disclosure-Control-based techniques is assessed by using a disclosure risk, that is, the risk that a piece of information
+   can be linked to a speciﬁc individual. 
+       One approach is based on finding the distance between records in the original and the masked dataset.
+        Another approach is to pair records in the original data and masked file, then the percentage of correctly paired records is a measure of disclosure risk.
+10) Classiﬁer accuracy is measured based on Bayesian classiﬁcation error.
+11) A metric, Hiding Failure (HF), is defined by Oliveira as the percentage of restrictive patterns that are discovered from the sanitized database.
+12) Evaluation of data quality is relative.
+    
+	"In the scientiﬁc literature data quality is generally considered a multi-dimensional concept that in certain contexts involves both objective and subjective
+    parameters.” [1]
+	        
+	The quality of data can be judged by the following metrics - 
+		Information Loss
+		Data Confusion
+		Classification Metric (proposed by Iyengar)
+		Loss Metric (proposed by Iyengar)
+		height of generalization (usually for k-anonymization approaches)
+		Discernibility Metric (DM) (proposed by Bayado and Agarwal)
+		Misses Cost
+		Consistency lack
+		Artifactual Pattern 
+13) The complexity metric measures the efﬁciency and scalability of a PPDM algorithm. [1]   
+		In case of distributed algorithms, especially the cryptography-based algorithms, the time requirements can be evaluated in terms of communication cost
+	during the exchange of information among secure processing. [1]
+		For the evaluation of time requirements, there are several approaches such as measuring the CPU time or evaluating the time requirements in terms of
+	computational cost.
+       Sometimes, the performance is measured in terms of the number of encryption and decryption operations required by the specific algorithm.
+
+REFERENCES :
+[1] A Survey of Quantiﬁcation of Privacy Preserving Data Mining Algorithms, by Elisa Bertino, Dan Lin, and Wei Jiang. 
+[2] Bertino, E., Fovino, I.N., Provenza, L.P.: A framework for evaluating privacy preserving data mining algorithms. Data Mining and Knowledge Discovery 11(2),
+	121–154 (2005).
