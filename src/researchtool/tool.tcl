@@ -5,13 +5,6 @@ package require Tk
 #default values
 #contains column names
 set colNames ""
-#contains the delimiter, default set to comma
-set delimiter ","
-#contains default value of sensitive checkboxes
-set checkboxValue 0
-
-#contains default value of sensitive checkboxes
-set checkboxVal 0
 
 #default values of metrics
 set missesCost 0.0
@@ -163,16 +156,16 @@ proc ladd L {expr [join $L +]+0}
 
 #proc to split the first file data into columns
 proc splitIntoColumns {filename} {
-	global numCols
+	global numCols delimiter
 	set f [open $filename r]	
 	#the first line containing header names is skipped
 	set line [gets $f]
 	set file_data [read $f]
 	close $f
-	
+	puts "Delimiter is $delimiter"
 	set data [split $file_data "\n"]
     foreach {line} $data {
-		set csvdata [split $line ","]
+		set csvdata [split $line $delimiter]
 		set i 0
 		foreach {element} $csvdata {
 			global col$i
@@ -202,11 +195,10 @@ proc splitIntoColns {filename} {
 	set line [gets $f]
 	set file_data [read $f]
 	close $f
-	
-	
+	puts "Delimiter is $delimiter"
 	set data [split $file_data "\n"]
     foreach {line} $data {
-		set csvdata [split $line ","]
+		set csvdata [split $line $delimiter]
 		set i 0
 		foreach {element} $csvdata {
 			global coln$i
@@ -215,29 +207,29 @@ proc splitIntoColns {filename} {
 		}
 	}
 	#debugging
-	puts "Col : $coln0"
-	puts "Col : $coln1"
-	puts "Col : $coln2"
-	puts "Col : $coln3"
-	puts "Col : $coln4"
-	puts "Col : $coln5"
-	puts "Col : $coln6"
-	puts "Col : $coln7"
+	puts "Coln : $coln0"
+	puts "Coln : $coln1"
+	puts "Coln : $coln2"
+	puts "Coln : $coln3"
+	puts "Coln : $coln4"
+	puts "Coln : $coln5"
+	puts "Coln : $coln6"
+	puts "Coln : $coln7"
 };
  
 #proc to open first file
 proc openFile1 {} {
 	set fn "openFile1"
-	global t colNames numCols
+	global t colNames numCols myFirstFile
 
-	set myFile [tk_getOpenFile]
+	set myFirstFile [tk_getOpenFile]
 
-	puts stdout [format "%s:myFile=<%s>" $fn $myFile]
+	puts stdout [format "%s:myFirstFile=<%s>" $fn $myFirstFile]
 
-	set fileID [open $myFile r]
+	set fileID [open $myFirstFile r]
 
 	#fetch first line from the file - header names
-	set firstLine [getFirstLineFromFile $myFile]
+	set firstLine [getFirstLineFromFile $myFirstFile]
 
 	#split first line into column names
 	set colNames [split $firstLine ,]
@@ -245,20 +237,17 @@ proc openFile1 {} {
 	#number of columns in the file
 	set numCols [llength  $colNames ]
 	puts "Number of columns in $colNames is $numCols" 
-
-	#the data is split into individual columns
-	splitIntoColumns $myFile;
 	
-	#debugging - to check if global variables work
-	global col0 col1 col2 col3 col4 col5 col6 col7 col8
-	puts "Col : $col0"
-	puts "Col : $col1"
-	puts "Col : $col2"
-	puts "Col : $col3"
-	puts "Col : $col4"
-	puts "Col : $col5"
-	puts "Col : $col6"
-	puts "Col : $col7"
+	# #debugging - to check if global variables work
+	# global col0 col1 col2 col3 col4 col5 col6 col7 col8
+	# puts "Col : $col0"
+	# puts "Col : $col1"
+	# puts "Col : $col2"
+	# puts "Col : $col3"
+	# puts "Col : $col4"
+	# puts "Col : $col5"
+	# puts "Col : $col6"
+	# puts "Col : $col7"
 	
 	#populates the textarea with new information
 	set i 1
@@ -275,16 +264,13 @@ proc openFile1 {} {
 # proc to open second file
 proc openFile2 {} {
 	set fn "openFile2"
-	global t
+	global t mySecondFile
 
-	set myFile [tk_getOpenFile]
+	set mySecondFile [tk_getOpenFile]
 
-	puts stdout [format "%s:myFile=<%s>" $fn $myFile]
+	puts stdout [format "%s:myFile=<%s>" $fn $mySecondFile]
 
-	set fileID [open $myFile r]
-	
-	#the data is split into individual columns
-	splitIntoColns $myFile;
+	set fileID [open $mySecondFile r]
 	
 	#populates the textarea with new information
 	set i 1
@@ -300,8 +286,15 @@ proc openFile2 {} {
 
 #Selecting the columns with sensitive information
 proc gotoFourthStep {} {	
-	global colNames welcomeFrame fourthFrame
+	global colNames welcomeFrame fourthFrame myFirstFile mySecondFile
+	
 	set fourthFrame ".fourthFrame";
+	
+	#the data of the first file is split into individual columns
+	splitIntoColumns $myFirstFile;
+	#the data of the second file is split into individual columns
+	splitIntoColns $mySecondFile;
+	
 	if {[winfo exists $fourthFrame]} { destroy $fourthFrame };
 	frame $fourthFrame -borderwidth 10 -background orange;
 	
@@ -313,7 +306,6 @@ proc gotoFourthStep {} {
 	label $fourthFrame.lblColumns -text "Step 4 : Select the columns with Sensitive data" -background orange -compound left 
 	pack $fourthFrame.lblColumns  -padx 20
 	
-	set checkbo 0
 	set i 0
 	#widget - checkbox
 	foreach x $colNames {
@@ -321,12 +313,8 @@ proc gotoFourthStep {} {
 		#set checkboxValue 0
 		#set c [checkbutton $fourthFrame.checkbox$x -text $x -variable checkboxValue$i -anchor nw -background orange -command [setSensitiveArray]];
 		#set c [checkbutton $fourthFrame.checkbox($x) -text $x -variable checkboxVal$i -anchor nw -background orange -command [puts [expr $checkboxVal${i}]]];
-		set c [checkbutton $fourthFrame.checkbox($i) -variable checkboxVal$i -text $x -anchor nw -background orange];
-		#set tempCheckbox checkboxValue${i}
-		#set var3 [set $var2]
-		#set t1 checkbox${i}
-		#set t2 $$t1
-		#puts "The value is ${$t1} and ${$t2}"
+		#set c [checkbutton $fourthFrame.checkbox -textvariable checkboxVal -text f -anchor nw -background orange];
+		set c [scale $fourthFrame.scale$i -orient horizontal -from 0 -to 100 -length 30  -variable checkBoxVal$i -showvalue 0]
 		
 		
 		incr i
@@ -344,7 +332,11 @@ proc gotoFourthStep {} {
 
 #selecting the delimiter
 proc gotoThirdStep {} {
-	global thirdFrame welcomeFrame delimiter
+	global thirdFrame welcomeFrame
+	
+	#contains the delimiter, default set to comma
+	set delimiter ","
+	
 	set thirdFrame ".thirdFrame";
 	if {[winfo exists $thirdFrame]} { destroy $thirdFrame };
 	frame $thirdFrame -borderwidth 10 -background orange;
@@ -360,12 +352,6 @@ proc gotoThirdStep {} {
 	#widget - delimiter entry field
 	entry $thirdFrame.entryDelimiter -width 10 -bd 2 -textvariable delimiter
 	pack $thirdFrame.entryDelimiter  -padx 20
-	
-	
-	set ask [.thirdFrame.entryDelimiter get]
-	
-	puts "Value of delimiter is $ask"
-	
 	
 	#widget - next step button
 	button $thirdFrame.nextStep -text "Next Step ->" -background lightgrey -command {gotoFourthStep}
