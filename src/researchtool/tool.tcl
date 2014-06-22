@@ -6,6 +6,9 @@ package require Tk
 #contains column names
 set colNames ""
 
+#empty sensitive array
+set sensitiveArray [list]
+
 #default values of metrics
 set missesCost 0.0
 set informationLoss 0.0
@@ -95,9 +98,16 @@ proc getInformationLoss {} {
 };
 
 proc analyze {} {  
-	global col1 coln1 analyzeFrame welcomeFrame missesCost hidingFailure
+	global col1 coln1 analyzeFrame welcomeFrame missesCost hidingFailure colNames
 	set analyzeFrame ".analyzeFrame";
 	set resultsFrame ".resultsFrame";
+	
+	#loop to create dynamic variables
+	for {set i 0} {$i < [expr [llength $colNames]]} {incr i} {
+		global checkbox$i
+		puts "Value in Checkbox $i is [set checkbox$i]"
+	}
+	
 	
 	#computes misses cost
 	getMissesCost;
@@ -238,17 +248,6 @@ proc openFile1 {} {
 	set numCols [llength  $colNames ]
 	puts "Number of columns in $colNames is $numCols" 
 	
-	# #debugging - to check if global variables work
-	# global col0 col1 col2 col3 col4 col5 col6 col7 col8
-	# puts "Col : $col0"
-	# puts "Col : $col1"
-	# puts "Col : $col2"
-	# puts "Col : $col3"
-	# puts "Col : $col4"
-	# puts "Col : $col5"
-	# puts "Col : $col6"
-	# puts "Col : $col7"
-	
 	#populates the textarea with new information
 	set i 1
 	$t.text1 delete 1.0 end
@@ -296,7 +295,7 @@ proc gotoFourthStep {} {
 	splitIntoColns $mySecondFile;
 	
 	if {[winfo exists $fourthFrame]} { destroy $fourthFrame };
-	frame $fourthFrame -borderwidth 10 -background orange;
+	frame $fourthFrame -borderwidth 0 -background orange;
 	
 	#pack the welcome frame
 	pack $::welcomeFrame -side top -expand true -fill both 
@@ -306,20 +305,22 @@ proc gotoFourthStep {} {
 	label $fourthFrame.lblColumns -text "Step 4 : Select the columns with Sensitive data" -background orange -compound left 
 	pack $fourthFrame.lblColumns  -padx 20
 	
+	#my dictionary with sensitive columns
+	set mySensitiveArray [dict create "column_name" "sensitivity"]
+
 	set i 0
 	#widget - checkbox
 	foreach x $colNames {
-		#global checkboxVal$i
-		#set checkboxValue 0
-		#set c [checkbutton $fourthFrame.checkbox$x -text $x -variable checkboxValue$i -anchor nw -background orange -command [setSensitiveArray]];
-		#set c [checkbutton $fourthFrame.checkbox($x) -text $x -variable checkboxVal$i -anchor nw -background orange -command [puts [expr $checkboxVal${i}]]];
-		#set c [checkbutton $fourthFrame.checkbox -textvariable checkboxVal -text f -anchor nw -background orange];
-		set c [scale $fourthFrame.scale$i -orient horizontal -from 0 -to 100 -length 30  -variable checkBoxVal$i -showvalue 0]
+		set checkbox$i 0
+		#set c [checkbutton $fourthFrame.checkbox$i -text $x -anchor nw -background orange];
+		set c [scale $fourthFrame.scale$i -label $x -orient horizontal -from 0 -to 100 -length 400 -showvalue 0 -tickinterval 10 -variable checkbox$i -background orange  -sliderrelief raised -width 8]
 		
-		
+		#dict lappend mySensitiveArray $x [set checkboxVal$i]
 		incr i
-		pack $c -side top -anchor nw -fill x -expand false;
+		pack $c -side top -anchor nw -expand false -padx 20 -pady 3;
 	}
+	
+	puts "Vineet  dictionary is $mySensitiveArray" 
 	
 	#widget - next step button
 	button $fourthFrame.nextStep -text "Final Step - Analyze" -background lightgrey -command {analyze}
@@ -402,7 +403,7 @@ proc gotoSecondStep {} {
 }
 
 #setting up window
-wm geometry . "700x600+10+10"
+wm geometry . "800x600+10+10"
 wm title . "Privacy Preserving Algorithm Analysis Tool"
 
 #setting up frame stuff
