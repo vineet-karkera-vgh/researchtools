@@ -21,7 +21,7 @@ set numberOfSensitiveElements 0
 set numberOfNonSensitiveElements 0
 
 proc setSensitiveArray {} {
-	global colNames
+	global colNames mySensitiveArray
 	
 	#a dictionary containing level of sensitivity of each column, as given by the user
 	set mySensitiveArray [dict create "column_name" "sensitivity"]
@@ -68,7 +68,7 @@ proc checkEachElement {col1 coln1} {
 # calculates PRIVACY (hiding failure) as defined by Oliveira in his paper, discussed further in the report submitted
 proc getHidingFailure {} {  
 	#find the number of sensitive elements that have been revealed
-	global hidingFailure col1 coln1
+	global hidingFailure col1 coln1 mySensitiveArray
 	set count 0
 	#check if the column is sensitive only then
 	foreach a $col1 b $coln1 {
@@ -77,11 +77,13 @@ proc getHidingFailure {} {
 		} 
 	}
 	set hidingFailure [expr (($count * 100.00 )/ [llength $col1])]
+	puts "Vineet - 3rd column value is [dict get $mySensitiveArray 3]"
 };
 
 # calculates UTILITY (misses cost) as defined by Oliveira in his paper, discussed further in the report submitted
 proc getMissesCost {} {  
-	global missesCost col1 coln1
+	global missesCost col1 coln1 mySensitiveArray
+	puts "Vineet - 3rd column value is [dict get $mySensitiveArray 3]"
 	#misses cost measures the percentage of non-restrictive patterns that are hidden after sanitization
 	set count 0
 	#check if the column is non-sensitive only then
@@ -95,7 +97,8 @@ proc getMissesCost {} {
 
 # calculates ACCURACY OR DATA QUALLITY(information loss) as defined by Oliveira in his paper, discussed further in the report submitted
 proc getInformationLoss {} {  
-	global informationLoss col1 coln1
+	global informationLoss col1 coln1 mySensitiveArray
+	puts "Vineet - 3rd column value is [dict get $mySensitiveArray 3]"
 	set count 0
 	foreach a $col1 b $coln1 {
 		if { $a != $b } {
@@ -149,6 +152,7 @@ proc analyze {} {
  
 	#destroy previous frame and packs the new frame
 	if {[winfo exists .fourthFrame]} { destroy .fourthFrame };
+	if {[winfo exists .sensitivityFrame]} { destroy .sensitivityFrame };
 	pack $resultsFrame -expand true -fill both -side top
 	pack $analyzeFrame -side left -expand true -fill both
 	
@@ -313,12 +317,8 @@ proc gotoFourthStep {} {
 	label $fourthFrame.lblColumns -text "Step 4 : Select the Quasi Identifier or Sensitive Columns" -background orange -compound left 
 	pack $fourthFrame.lblColumns  -padx 20 -side top
 	
-	label $fourthFrame.lblColumnName -text "Column Name" -background orange -compound left 
-	label $sensitivityFrame.lblLow -text "Low" -background orange -compound left 
-	label $sensitivityFrame.lblSensitivity -text "Sensitivity" -background orange -compound left 
-	label $sensitivityFrame.lblHigh -text "High" -background orange -compound left 
-	pack $fourthFrame.lblColumnName -padx 20 -side top
-	pack $sensitivityFrame.lblLow $sensitivityFrame.lblSensitivity $sensitivityFrame.lblHigh -padx 10 -side left
+	label $fourthFrame.lblColumnName -text "Low ----------------------------- Sensitivity ------------------------------ High" -background orange -compound left  
+	pack $fourthFrame.lblColumnName -padx 20 -side top -anchor nw
 	
 	set i 0
 	#widget - checkbox
@@ -337,7 +337,6 @@ proc gotoFourthStep {} {
 	#destroy previous frame and pack new frame
 	if {[winfo exists .thirdFrame]} { destroy .thirdFrame};
 	pack $fourthFrame -side top -expand true -fill both
-	pack $sensitivityFrame -side top
 };
 
 #selecting the delimiter
