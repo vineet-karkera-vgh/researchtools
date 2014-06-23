@@ -314,7 +314,7 @@ proc gotoFourthStep {} {
 	
 	#widgets in the window
 	#widget - upload file label
-	label $fourthFrame.lblColumns -text "Step 4 : Select the Quasi Identifier or Sensitive Columns" -background orange -compound left 
+	label $fourthFrame.lblColumns -text "Step 4 : Choose the privacy level for each of the columns making them Sensitive, Quasi-Identifier or Non-Sensitive." -background orange -compound left 
 	pack $fourthFrame.lblColumns  -padx 20 -side top
 	
 	label $fourthFrame.lblColumnName -text "Low ----------------------------- Sensitivity ------------------------------ High" -background orange -compound left  
@@ -411,7 +411,7 @@ proc gotoSecondStep {} {
 }
 
 #setting up window
-wm geometry . "800x600+10+10"
+wm geometry . "800x700+10+10"
 #wm attributes . -fullscreen 1
 wm title . "Privacy Preserving Algorithm Analysis Tool"
 
