@@ -20,14 +20,22 @@ set nonSensitiveElementDifference 0
 set numberOfSensitiveElements 0
 set numberOfNonSensitiveElements 0
 
-proc setSensitiveArray {key checkboxValue} {
-
-	puts "Vineet - Key : $key"
-	puts "Vineet - checkboxValue : $checkboxValue"
+proc setSensitiveArray {} {
+	global colNames
 	
+	#a dictionary containing level of sensitivity of each column, as given by the user
+	set mySensitiveArray [dict create "column_name" "sensitivity"]
+	
+	#loop to create dynamic variables
+	for {set i 0} {$i < [expr [llength $colNames]]} {incr i} {
+		global checkbox$i
+		puts "Value in Checkbox $i is [set checkbox$i]"
+		set val [set checkbox$i]
+		dict lappend mySensitiveArray $i $val
+	}
+	#set vvv [dict get $mySensitiveArray 3]
+	#puts "Vineet - 3rd column value is [dict get $mySensitiveArray 3]"
 }
-
-
 
 # calculates misses cost as defined by Oliveira in his paper, discussed further in the report submitted
 proc checkEachElement {col1 coln1} {  
@@ -98,16 +106,12 @@ proc getInformationLoss {} {
 };
 
 proc analyze {} {  
-	global col1 coln1 analyzeFrame welcomeFrame missesCost hidingFailure colNames
+	global col1 coln1 analyzeFrame welcomeFrame missesCost hidingFailure
 	set analyzeFrame ".analyzeFrame";
 	set resultsFrame ".resultsFrame";
 	
-	#loop to create dynamic variables
-	for {set i 0} {$i < [expr [llength $colNames]]} {incr i} {
-		global checkbox$i
-		puts "Value in Checkbox $i is [set checkbox$i]"
-	}
-	
+	#sets the values given by user into a global array mySensitiveArray
+	setSensitiveArray;
 	
 	#computes misses cost
 	getMissesCost;
@@ -288,6 +292,7 @@ proc gotoFourthStep {} {
 	global colNames welcomeFrame fourthFrame myFirstFile mySecondFile
 	
 	set fourthFrame ".fourthFrame";
+	set sensitivityFrame ".sensitivityFrame";
 	
 	#the data of the first file is split into individual columns
 	splitIntoColumns $myFirstFile;
@@ -297,30 +302,33 @@ proc gotoFourthStep {} {
 	if {[winfo exists $fourthFrame]} { destroy $fourthFrame };
 	frame $fourthFrame -borderwidth 0 -background orange;
 	
+	if {[winfo exists $sensitivityFrame]} { destroy $sensitivityFrame };
+	frame $sensitivityFrame -borderwidth 0 -background orange;
+	
 	#pack the welcome frame
 	pack $::welcomeFrame -side top -expand true -fill both 
 	
 	#widgets in the window
 	#widget - upload file label
-	label $fourthFrame.lblColumns -text "Step 4 : Select the columns with Sensitive data" -background orange -compound left 
-	pack $fourthFrame.lblColumns  -padx 20
+	label $fourthFrame.lblColumns -text "Step 4 : Select the Quasi Identifier or Sensitive Columns" -background orange -compound left 
+	pack $fourthFrame.lblColumns  -padx 20 -side top
 	
-	#my dictionary with sensitive columns
-	set mySensitiveArray [dict create "column_name" "sensitivity"]
-
+	label $fourthFrame.lblColumnName -text "Column Name" -background orange -compound left 
+	label $sensitivityFrame.lblLow -text "Low" -background orange -compound left 
+	label $sensitivityFrame.lblSensitivity -text "Sensitivity" -background orange -compound left 
+	label $sensitivityFrame.lblHigh -text "High" -background orange -compound left 
+	pack $fourthFrame.lblColumnName -padx 20 -side top
+	pack $sensitivityFrame.lblLow $sensitivityFrame.lblSensitivity $sensitivityFrame.lblHigh -padx 10 -side left
+	
 	set i 0
 	#widget - checkbox
 	foreach x $colNames {
 		set checkbox$i 0
 		#set c [checkbutton $fourthFrame.checkbox$i -text $x -anchor nw -background orange];
 		set c [scale $fourthFrame.scale$i -label $x -orient horizontal -from 0 -to 100 -length 400 -showvalue 0 -tickinterval 10 -variable checkbox$i -background orange  -sliderrelief raised -width 8]
-		
-		#dict lappend mySensitiveArray $x [set checkboxVal$i]
 		incr i
 		pack $c -side top -anchor nw -expand false -padx 20 -pady 3;
-	}
-	
-	puts "Vineet  dictionary is $mySensitiveArray" 
+	} 
 	
 	#widget - next step button
 	button $fourthFrame.nextStep -text "Final Step - Analyze" -background lightgrey -command {analyze}
@@ -329,6 +337,7 @@ proc gotoFourthStep {} {
 	#destroy previous frame and pack new frame
 	if {[winfo exists .thirdFrame]} { destroy .thirdFrame};
 	pack $fourthFrame -side top -expand true -fill both
+	pack $sensitivityFrame -side top
 };
 
 #selecting the delimiter
@@ -404,6 +413,7 @@ proc gotoSecondStep {} {
 
 #setting up window
 wm geometry . "800x600+10+10"
+#wm attributes . -fullscreen 1
 wm title . "Privacy Preserving Algorithm Analysis Tool"
 
 #setting up frame stuff
