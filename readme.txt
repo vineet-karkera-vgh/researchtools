@@ -11,6 +11,13 @@ Step 4: At shell command prompt type the following command
 or
 	wish tool.tcl &
 
+
+Alternatively, 
+Step 1: Download the project
+Step 2: Browse to the folder containing the file tool.tcl
+Step 3: At shell command prompt type the following command
+	make tool
+
 Author : Vineet Karkera
 MUN # 201281896
 E-mail : vineet.karkera@gmail.com
