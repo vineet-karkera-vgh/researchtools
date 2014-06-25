@@ -7,13 +7,5 @@ CC = @CC@
 OBJS = 
 SRCS = tool.tcl
 
-all: tclsh
-
-tclsh: tclAppInit.o
-	${CC} tclAppInit.o -o tclsh
-
-tool: tool.o
-	${CC} tool.o -o tool
-
-Makefile: Makefile.in
-	$(SHELL) config.status
+tool : ${SRCS}
+	tclsh tool.tcl
