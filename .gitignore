@@ -3,3 +3,6 @@
 *.pdf
 *.gz
 *.git
+test*.txt
+test*.csv
+test*.tcl
