@@ -1,6 +1,7 @@
 #!/usr/bin/env tclsh
 #Author: Vineet Karkera
 package require Tk
+package require BWidget
 
 #default values
 #contains column names
@@ -150,12 +151,14 @@ proc analyze {} {
 	label $analyzeFrame.lbl8 -text "Misses Cost - [format "%.2f" $missesCost] %" -background orange -compound left  
 	pack $analyzeFrame.lbl7 $analyzeFrame.lbl8 -padx 20 -side left -expand true -fill both
  
-	#destroy previous frame and packs the new frame
+	#destroy previous frames and packs the new frame
+	global sw
+	if {[winfo exists $sw]} { destroy $sw};
 	if {[winfo exists .fourthFrame]} { destroy .fourthFrame };
 	if {[winfo exists .sensitivityFrame]} { destroy .sensitivityFrame };
+	if {[winfo exists .buttonFrame]} { destroy .buttonFrame };
 	pack $resultsFrame -expand true -fill both -side top
 	pack $analyzeFrame -side left -expand true -fill both
-	
 	
 	#call proc to draw bar chart with calculated values
 	createBarChart;
@@ -314,29 +317,56 @@ proc gotoFourthStep {} {
 	
 	#widgets in the window
 	#widget - upload file label
-	label $fourthFrame.lblColumns -text "Step 4 : Choose the privacy level for each of the columns making them Sensitive, Quasi-Identifier or Non-Sensitive." -background orange -compound left 
+	label $fourthFrame.lblColumns -text "Step 4 : Choose the privacy level for each of the columns making them Sensitive or Non-Sensitive." -background orange -compound left 
 	pack $fourthFrame.lblColumns  -padx 20 -side top
 	
 	label $fourthFrame.lblColumnName -text "Low ----------------------------- Sensitivity ------------------------------ High" -background orange -compound left  
 	pack $fourthFrame.lblColumnName -padx 20 -side top -anchor nw
 	
+	global sw
+	# Make a frame scrollable
+	set sw [ScrolledWindow .sw]
+
+	set sf [ScrollableFrame $sw.sf]
+
+	$sw setwidget $sf
+
+	set uf [$sf getframe]
+
 	set i 0
-	#widget - checkbox
-	foreach x $colNames {
+	# Now fill the frame, resize the window to see the scrollbars in action 
+    foreach x $colNames {
 		set checkbox$i 0
 		#set c [checkbutton $fourthFrame.checkbox$i -text $x -anchor nw -background orange];
-		set c [scale $fourthFrame.scale$i -label $x -orient horizontal -from 0 -to 100 -length 400 -showvalue 0 -tickinterval 10 -variable checkbox$i -background orange  -sliderrelief raised -width 8]
+		set c [scale $uf.scale$i -label $x -orient horizontal -from 0 -to 100 -length 400 -showvalue 0 -tickinterval 10 -variable checkbox$i -background orange  -sliderrelief raised -width 8]
+		#pack $c -side top -anchor nw -expand false -padx 20 -pady 3;
+		puts "value of i here is $i"
+		grid $c -row $i -column 1
 		incr i
-		pack $c -side top -anchor nw -expand false -padx 20 -pady 3;
-	} 
+	}
+        
+	# set i 0
+	# #widget - checkbox
+	# foreach x $colNames {
+		# set checkbox$i 0
+		# #set c [checkbutton $fourthFrame.checkbox$i -text $x -anchor nw -background orange];
+		# set c [scale $fourthFrame.scale$i -label $x -orient horizontal -from 0 -to 100 -length 400 -showvalue 0 -tickinterval 10 -variable checkbox$i -background orange  -sliderrelief raised -width 8]
+		# incr i
+		# pack $c -side top -anchor nw -expand false -padx 20 -pady 3;
+	# }
+	
+	if {[winfo exists .buttonFrame]} { destroy .buttonFrame };
+	frame .buttonFrame -borderwidth 0 -background orange;
 	
 	#widget - next step button
-	button $fourthFrame.nextStep -text "Final Step - Analyze" -background lightgrey -command {analyze}
-	pack $fourthFrame.nextStep -padx 20 -pady 20
+	button .buttonFrame.nextStep -text "Final Step - Analyze" -background lightgrey -command {analyze}
+	pack .buttonFrame.nextStep -padx 20 -pady 20
 	
 	#destroy previous frame and pack new frame
 	if {[winfo exists .thirdFrame]} { destroy .thirdFrame};
-	pack $fourthFrame -side top -expand true -fill both
+	pack $fourthFrame -side top -expand 1 -fill both
+	pack $sw -side top -expand 1 -fill both
+	pack .buttonFrame -side top -expand 1 -fill both
 };
 
 #selecting the delimiter
