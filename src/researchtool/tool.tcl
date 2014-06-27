@@ -154,7 +154,7 @@ proc analyze {} {
 	#destroy previous frames and packs the new frame
 	global sw
 	if {[winfo exists $sw]} { destroy $sw};
-	if {[winfo exists .fourthFrame]} { destroy .fourthFrame };
+	if {[winfo exists .sensitivityLabelFrame]} { destroy .sensitivityLabelFrame };
 	if {[winfo exists .sensitivityFrame]} { destroy .sensitivityFrame };
 	if {[winfo exists .buttonFrame]} { destroy .buttonFrame };
 	pack $resultsFrame -expand true -fill both -side top
@@ -295,10 +295,10 @@ proc openFile2 {} {
 };
 
 #Selecting the columns with sensitive information
-proc gotoFourthStep {} {	
-	global colNames welcomeFrame fourthFrame myFirstFile mySecondFile
+proc setSensitivityLevel {} {	
+	global colNames welcomeFrame sensitivityLabelFrame myFirstFile mySecondFile
 	
-	set fourthFrame ".fourthFrame";
+	set sensitivityLabelFrame ".sensitivityLabelFrame";
 	set sensitivityFrame ".sensitivityFrame";
 	
 	#the data of the first file is split into individual columns
@@ -306,8 +306,8 @@ proc gotoFourthStep {} {
 	#the data of the second file is split into individual columns
 	splitIntoColns $mySecondFile;
 	
-	if {[winfo exists $fourthFrame]} { destroy $fourthFrame };
-	frame $fourthFrame -borderwidth 0 -background orange;
+	if {[winfo exists $sensitivityLabelFrame]} { destroy $sensitivityLabelFrame };
+	frame $sensitivityLabelFrame -borderwidth 0 -background orange;
 	
 	if {[winfo exists $sensitivityFrame]} { destroy $sensitivityFrame };
 	frame $sensitivityFrame -borderwidth 0 -background orange;
@@ -317,17 +317,17 @@ proc gotoFourthStep {} {
 	
 	#widgets in the window
 	#widget - upload file label
-	label $fourthFrame.lblColumns -text "Step 4 : Choose the privacy level for each of the columns making them Sensitive or Non-Sensitive." -background orange -compound left 
-	pack $fourthFrame.lblColumns  -padx 20 -side top
+	label $sensitivityLabelFrame.lblColumns -text "Step 4 : Choose the privacy level for each of the columns making them Sensitive or Non-Sensitive." -background orange -compound left 
+	pack $sensitivityLabelFrame.lblColumns  -padx 20 -side top
 	
-	label $fourthFrame.lblColumnName -text "Low ----------------------------- Sensitivity ------------------------------ High" -background orange -compound left  
-	pack $fourthFrame.lblColumnName -padx 20 -side top -anchor nw
+	label $sensitivityLabelFrame.lblColumnName -text "Low ----------------------------- Sensitivity ------------------------------ High" -background orange -compound left  
+	pack $sensitivityLabelFrame.lblColumnName -padx 20 -side top -anchor nw
 	
 	global sw
 	# Make a frame scrollable
 	set sw [ScrolledWindow .sw]
 
-	set sf [ScrollableFrame $sw.sf]
+	set sf [ScrollableFrame $sw.sf -background orange]
 
 	$sw setwidget $sf
 
@@ -337,23 +337,13 @@ proc gotoFourthStep {} {
 	# Now fill the frame, resize the window to see the scrollbars in action 
     foreach x $colNames {
 		set checkbox$i 0
-		#set c [checkbutton $fourthFrame.checkbox$i -text $x -anchor nw -background orange];
+		#set c [checkbutton $sensitivityLabelFrame.checkbox$i -text $x -anchor nw -background orange];
 		set c [scale $uf.scale$i -label $x -orient horizontal -from 0 -to 100 -length 400 -showvalue 0 -tickinterval 10 -variable checkbox$i -background orange  -sliderrelief raised -width 8]
 		#pack $c -side top -anchor nw -expand false -padx 20 -pady 3;
 		puts "value of i here is $i"
 		grid $c -row $i -column 1
 		incr i
 	}
-        
-	# set i 0
-	# #widget - checkbox
-	# foreach x $colNames {
-		# set checkbox$i 0
-		# #set c [checkbutton $fourthFrame.checkbox$i -text $x -anchor nw -background orange];
-		# set c [scale $fourthFrame.scale$i -label $x -orient horizontal -from 0 -to 100 -length 400 -showvalue 0 -tickinterval 10 -variable checkbox$i -background orange  -sliderrelief raised -width 8]
-		# incr i
-		# pack $c -side top -anchor nw -expand false -padx 20 -pady 3;
-	# }
 	
 	if {[winfo exists .buttonFrame]} { destroy .buttonFrame };
 	frame .buttonFrame -borderwidth 0 -background orange;
@@ -363,81 +353,45 @@ proc gotoFourthStep {} {
 	pack .buttonFrame.nextStep -padx 20 -pady 20
 	
 	#destroy previous frame and pack new frame
-	if {[winfo exists .thirdFrame]} { destroy .thirdFrame};
-	pack $fourthFrame -side top -expand 1 -fill both
+	if {[winfo exists .delimiterFrame]} { destroy .delimiterFrame};
+	pack $sensitivityLabelFrame -side top -expand 1 -fill both
 	pack $sw -side top -expand 1 -fill both
 	pack .buttonFrame -side top -expand 1 -fill both
 };
 
 #selecting the delimiter
-proc gotoThirdStep {} {
-	global thirdFrame welcomeFrame
+proc getDelimiter {} {
+	global delimiterFrame welcomeFrame
 	
 	#contains the delimiter, default set to comma
 	set delimiter ","
 	
-	set thirdFrame ".thirdFrame";
-	if {[winfo exists $thirdFrame]} { destroy $thirdFrame };
-	frame $thirdFrame -borderwidth 10 -background orange;
+	set delimiterFrame ".delimiterFrame";
+	if {[winfo exists $delimiterFrame]} { destroy $delimiterFrame };
+	frame $delimiterFrame -borderwidth 10 -background orange;
 	
 	#pack the welcome frame
 	pack $::welcomeFrame -side top -expand true -fill both 
 	
 	#widgets in the window
 	#widget - specify delimiter
-	label $thirdFrame.lblDelimiter -text "Step 3 : Specify a delimiter" -background orange -compound left 
-	pack $thirdFrame.lblDelimiter  -padx 20
+	label $delimiterFrame.lblDelimiter -text "Step 3 : Specify a delimiter" -background orange -compound left 
+	pack $delimiterFrame.lblDelimiter  -padx 20
 
 	#widget - delimiter entry field
-	entry $thirdFrame.entryDelimiter -width 10 -bd 2 -textvariable delimiter
-	pack $thirdFrame.entryDelimiter  -padx 20
+	entry $delimiterFrame.entryDelimiter -width 10 -bd 2 -textvariable delimiter
+	pack $delimiterFrame.entryDelimiter  -padx 20
 	
 	#widget - next step button
-	button $thirdFrame.nextStep -text "Next Step ->" -background lightgrey -command {gotoFourthStep}
-	pack $thirdFrame.nextStep -padx 20 -pady 20
+	button $delimiterFrame.nextStep -text "Next Step ->" -background lightgrey -command {setSensitivityLevel}
+	pack $delimiterFrame.nextStep -padx 20 -pady 20
 	
 	#destroy previous frames and pack new frame
 	if {[winfo exists .myArea]} { destroy .myArea };
 	if {[winfo exists .browseButtonFrame]} { destroy .browseButtonFrame };
 	if {[winfo exists .textAreaFrame]} { destroy .textAreaFrame };
 	if {[winfo exists .nextButtonFrame]} { destroy .nextButtonFrame };
-	pack $thirdFrame -side top -expand true -fill both
-}
-
-# Upload the Second File
-proc gotoSecondStep {} {
-	global secondFrame welcomeFrame
-	set secondFrame ".secondFrame";
-	if {[winfo exists $secondFrame]} { destroy $secondFrame };
-	frame $secondFrame -borderwidth 10 -background orange;
-	
-	#pack the welcome frame
-	pack $::welcomeFrame -side top -expand true -fill both 
-	
-	#widgets in the window
-	#widget - upload file label
-	label $secondFrame.lbl3 -text "Step 2 : Upload Sanitized File" -background orange -compound left 
-	pack $secondFrame.lbl3  -padx 20
-
-	#widget - Browse button
-	button $secondFrame.browse2 -text "Browse" -background lightgrey -command {openFile2}
-	pack $secondFrame.browse2  -padx 20
-
-	#widget - textArea
-	text $secondFrame.text2 -bd 2 -bg white -height 7
-	pack $secondFrame.text2 -padx 20 -pady 5
-	
-	#widget - next step button
-	button $secondFrame.nextStep -text "Next Step ->" -background lightgrey -command {gotoThirdStep}
-	pack $secondFrame.nextStep -padx 20 -pady 20
-	
-	# lines within the text area
-	$secondFrame.text2 insert end "Please upload a csv file from the menu\n" tag0
-	$secondFrame.text2 insert end "Or use the Browse button above.." tag1
-	
-	#delete previous frame
-	if {[winfo exists .myArea]} { destroy .myArea };
-	pack $secondFrame -side top -expand true -fill both
+	pack $delimiterFrame -side top -expand true -fill both
 }
 
 #setting up window
@@ -488,7 +442,7 @@ pack $t.text1 -padx 10 -pady 5 -side left
 pack $t.text2 -padx 10 -pady 5 -side left
 
 #widget - next step button
-button $n.nextStep -text "Next Step ->" -background lightgrey -command {gotoThirdStep} -padx 15
+button $n.nextStep -text "Next Step ->" -background lightgrey -command {getDelimiter} -padx 15
 pack $n.nextStep -padx 20 -pady 20 
 
 #pack the entire frame containing labels
@@ -586,7 +540,7 @@ proc createBarChart {} {
 	global missesCost hidingFailure
 		
 	#destroy previous frame and packs the new frame
-	if {[winfo exists .fourthFrame]} { destroy .fourthFrame };
+	if {[winfo exists .sensitivityLabelFrame]} { destroy .sensitivityLabelFrame };
 	pack [canvas .c -width 240 -height 280  -background orange -highlightthickness 0] -side left -expand true -fill both	
 	bars .c "
 			{{HF} [format "%.2f" $hidingFailure] red}
