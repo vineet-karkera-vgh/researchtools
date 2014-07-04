@@ -313,15 +313,15 @@ proc setSensitivityLevel {} {
 	frame $sensitivityFrame -borderwidth 0 -background orange;
 	
 	#pack the welcome frame
-	pack $::welcomeFrame -side top -expand true -fill both 
+	pack $welcomeFrame -side top -expand true -fill both 
 	
 	#widgets in the window
 	#widget - upload file label
 	label $sensitivityLabelFrame.lblColumns -text "Step 4 : Choose the privacy level for each of the columns making them Sensitive or Non-Sensitive." -background orange -compound left 
-	pack $sensitivityLabelFrame.lblColumns  -padx 20 -side top
+	pack $sensitivityLabelFrame.lblColumns  -padx 20 -pady 40 -side top
 	
 	label $sensitivityLabelFrame.lblColumnName -text "Low ----------------------------- Sensitivity ------------------------------ High" -background orange -compound left  
-	pack $sensitivityLabelFrame.lblColumnName -padx 20 -side top -anchor nw
+	pack $sensitivityLabelFrame.lblColumnName -padx 160 -side top -anchor nw
 	
 	global sw
 	# Make a frame scrollable
@@ -341,7 +341,7 @@ proc setSensitivityLevel {} {
 		set c [scale $uf.scale$i -label $x -orient horizontal -from 0 -to 100 -length 400 -showvalue 0 -tickinterval 10 -variable checkbox$i -background orange  -sliderrelief raised -width 8]
 		#pack $c -side top -anchor nw -expand false -padx 20 -pady 3;
 		puts "value of i here is $i"
-		grid $c -row $i -column 1
+		grid $c -row $i -column 1 -padx 160
 		incr i
 	}
 	
@@ -353,11 +353,43 @@ proc setSensitivityLevel {} {
 	pack .buttonFrame.nextStep -padx 20 -pady 20
 	
 	#destroy previous frame and pack new frame
-	if {[winfo exists .delimiterFrame]} { destroy .delimiterFrame};
+	if {[winfo exists .metricFrame]} { destroy .metricFrame};
 	pack $sensitivityLabelFrame -side top -expand 1 -fill both
 	pack $sw -side top -expand 1 -fill both
 	pack .buttonFrame -side top -expand 1 -fill both
 };
+
+#select the metrics
+proc setMetricList {} {
+	global delimiterFrame metricList welcomeFrame metricFrame checkboxHidingFailure checkboxMissesCost checkboxLossMetric checkboxClassificationMetric checkboxDiscernibilityMetric
+	
+	set metricFrame ".metricFrame";
+	if {[winfo exists $metricFrame]} { destroy $metricFrame };
+	frame $metricFrame -borderwidth 10 -background orange;
+	
+	#pack the welcome frame
+	pack $welcomeFrame -side top -expand true -fill both 
+	
+	#widgets in the window
+	label $metricFrame.lblDelimiter -text "Step : Select the metrics to be calculated" -background orange -compound left 
+	pack $metricFrame.lblDelimiter  -padx 20
+
+	#widget - checkbox list of metrics
+	checkbutton $metricFrame.checkboxHidingFailure -text {Hiding Failure} -anchor nw -background orange -compound left 
+	checkbutton $metricFrame.checkboxMissesCost -text {Misses Cost} -anchor nw -background orange -compound left 
+	checkbutton $metricFrame.checkboxLossMetric -text {Loss Metric} -anchor nw -background orange -state disabled -compound left 
+	checkbutton $metricFrame.checkboxClassificationMetric -text {Classification Metric} -anchor nw -background orange -state disabled -compound left 
+	checkbutton $metricFrame.checkboxDiscernibilityMetric -text {Discernibility Metric} -anchor nw -background orange -state disabled -compound left 
+	pack $metricFrame.checkboxHidingFailure $metricFrame.checkboxMissesCost $metricFrame.checkboxLossMetric $metricFrame.checkboxClassificationMetric $metricFrame.checkboxDiscernibilityMetric -padx 20 -side top -expand 1 -fill both
+	
+	#widget - next step button
+	button $metricFrame.nextStep -text "Next Step ->" -background lightgrey -command {setSensitivityLevel}
+	pack $metricFrame.nextStep -padx 20 -pady 20 
+	
+	#destroy previous frames and pack new frame
+	if {[winfo exists $delimiterFrame]} { destroy $delimiterFrame };
+	pack $metricFrame -side top -expand true -fill both
+}
 
 #selecting the delimiter
 proc getDelimiter {} {
@@ -375,7 +407,7 @@ proc getDelimiter {} {
 	
 	#widgets in the window
 	#widget - specify delimiter
-	label $delimiterFrame.lblDelimiter -text "Step 3 : Specify a delimiter" -background orange -compound left 
+	label $delimiterFrame.lblDelimiter -text "Step : Specify a delimiter" -background orange -compound left 
 	pack $delimiterFrame.lblDelimiter  -padx 20
 
 	#widget - delimiter entry field
@@ -383,7 +415,7 @@ proc getDelimiter {} {
 	pack $delimiterFrame.entryDelimiter  -padx 20
 	
 	#widget - next step button
-	button $delimiterFrame.nextStep -text "Next Step ->" -background lightgrey -command {setSensitivityLevel}
+	button $delimiterFrame.nextStep -text "Next Step ->" -background lightgrey -command {setMetricList}
 	pack $delimiterFrame.nextStep -padx 20 -pady 20
 	
 	#destroy previous frames and pack new frame
@@ -537,15 +569,31 @@ proc bars {w data} {
 }
 
 proc createBarChart {} {
-	global missesCost hidingFailure
+	global missesCost hidingFailure checkboxHidingFailure checkboxMissesCost
 		
 	#destroy previous frame and packs the new frame
 	if {[winfo exists .sensitivityLabelFrame]} { destroy .sensitivityLabelFrame };
-	pack [canvas .c -width 240 -height 280  -background orange -highlightthickness 0] -side left -expand true -fill both	
-	bars .c "
+	pack [canvas .c -width 240 -height 280  -background orange -highlightthickness 0] -side left -expand true -fill both
+	if { $checkboxHidingFailure == 1 && $checkboxMissesCost == 1} {
+		bars .c "
 			{{HF} [format "%.2f" $hidingFailure] red}
 			{{MC} [format "%.2f" $missesCost] yellow}
 		"
+	} elseif {$checkboxHidingFailure == 1 && $checkboxMissesCost == 0} {
+         bars .c "
+			{{HF} [format "%.2f" $hidingFailure] red}
+		"
+	} elseif {$checkboxHidingFailure == 0 && $checkboxMissesCost == 1} {
+         bars .c "
+			{{MC} [format "%.2f" $missesCost] yellow}
+		"
+	} else {
+         bars .c "
+			{{HF} [format "%.2f" $hidingFailure] red}
+			{{MC} [format "%.2f" $missesCost] yellow}
+		"
+    }
+	
 	.c create text 120 10 -anchor nw -text "Bar Chart"
 }
 #end of barchart code
