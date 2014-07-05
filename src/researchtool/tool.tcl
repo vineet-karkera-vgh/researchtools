@@ -38,6 +38,25 @@ proc setSensitiveArray {} {
 	#puts "Vineet - 3rd column value is [dict get $mySensitiveArray 3]"
 }
 
+proc setQIArray {} {
+	global colNames myQIArray
+
+	#a dictionary containing the QI, as given by the user
+	set myQIArray [dict create "column_name" "checkboxValue"]
+	
+	#loop to create dynamic variables
+	for {set j 0} {$j < [expr [llength $colNames]]} {incr j} {
+		global qiCheckbox$j
+		puts "Value in qiCheckbox $j is [set qiCheckbox$j]"
+		set val [set qiCheckbox$j]
+		dict lappend myQIArray $j $val
+	}
+	#set vvv [dict get $myQIArray 3]
+	#puts "Vineet - 3rd column value is [dict get $myQIArray 3]"
+
+}
+
+
 # calculates misses cost as defined by Oliveira in his paper, discussed further in the report submitted
 proc checkEachElement {col1 coln1} {  
 	global sensitiveElementDifference nonSensitiveElementDifference numberOfSensitiveElements numberOfNonSensitiveElements
@@ -69,31 +88,59 @@ proc checkEachElement {col1 coln1} {
 # calculates PRIVACY (hiding failure) as defined by Oliveira in his paper, discussed further in the report submitted
 proc getHidingFailure {} {  
 	#find the number of sensitive elements that have been revealed
-	global hidingFailure col1 coln1 mySensitiveArray
+	global hidingFailure mySensitiveArray myQIArray numCols
+	
 	set count 0
-	#check if the column is sensitive only then
-	foreach a $col1 b $coln1 {
-		if { $a == $b } {
-			incr count
-		} 
+	set sensitiveCounter 0
+	for {set i 0} {$i < $numCols} {incr i} {
+		#setting up dynamic global variables
+		global col$i coln$i
+		#check if the column is sensitive only then
+		set value [dict get $mySensitiveArray $i]
+		if {$value > 0} {
+			incr sensitiveCounter
+			set originalColumn [set col$i]
+			set sanitizedColumn [set coln$i]
+			foreach a $originalColumn b $sanitizedColumn {
+				if { $a == $b } {
+					incr count
+				} 
+			}
+		}
 	}
-	set hidingFailure [expr (($count * 100.00 )/ [llength $col1])]
+	
+	puts "Vineet - Valueof sensitiveCounter is $sensitiveCounter , value of count is $count, value of length is [expr [llength $col0]] , originalColumn is $originalColumn , sanitizedColumn is $sanitizedColumn"
+	
+	set hidingFailure [expr (($count * 100.00 )/ ([llength $col0] * $sensitiveCounter))]
 	puts "Vineet - 3rd column value is [dict get $mySensitiveArray 3]"
+	puts "Vineet - 3rd column value is [dict get $myQIArray 3]"
 };
 
 # calculates UTILITY (misses cost) as defined by Oliveira in his paper, discussed further in the report submitted
-proc getMissesCost {} {  
-	global missesCost col1 coln1 mySensitiveArray
-	puts "Vineet - 3rd column value is [dict get $mySensitiveArray 3]"
-	#misses cost measures the percentage of non-restrictive patterns that are hidden after sanitization
+proc getMissesCost {} {
+	#misses cost measures the percentage of non-restrictive patterns that are hidden after sanitization  
+	global missesCost mySensitiveArray myQIArray numCols
+	
 	set count 0
-	#check if the column is non-sensitive only then
-	foreach a $col1 b $coln1 {
-		if { $a != $b } {
-			incr count
-		} 
+	set nonSensitiveCounter 0
+	
+	for {set i 0} {$i < $numCols} {incr i} {
+		#setting up dynamic global variables
+		global col$i coln$i
+		#check if the column is non-sensitive only then
+		set value [dict get $mySensitiveArray $i]
+		if {$value == 0} {
+			incr nonSensitiveCounter
+			set originalColumn [set col$i]
+			set sanitizedColumn [set coln$i]
+			foreach a $originalColumn b $sanitizedColumn {
+				if { $a != $b } {
+					incr count
+				} 
+			}
+		}
 	}
-	set missesCost [expr (($count * 100.00 )/ [llength $col1])]
+	set missesCost [expr (($count * 100.00 )/ ([llength $col0] * $nonSensitiveCounter))]
 };
 
 # calculates ACCURACY OR DATA QUALLITY(information loss) as defined by Oliveira in his paper, discussed further in the report submitted
@@ -116,6 +163,9 @@ proc analyze {} {
 	
 	#sets the values given by user into a global array mySensitiveArray
 	setSensitiveArray;
+	
+	#sets the QI groups given by user into a global array myQIArray
+	setQIArray;
 	
 	#computes misses cost
 	getMissesCost;
@@ -317,10 +367,10 @@ proc setSensitivityLevel {} {
 	
 	#widgets in the window
 	#widget - upload file label
-	label $sensitivityLabelFrame.lblColumns -text "Step 4 : Choose the privacy level for each of the columns making them Sensitive or Non-Sensitive." -background orange -compound left 
+	label $sensitivityLabelFrame.lblColumns -text "Step : Choose the privacy level for each of the columns making them Sensitive or Non-Sensitive." -background orange -compound left 
 	pack $sensitivityLabelFrame.lblColumns  -padx 20 -pady 40 -side top
 	
-	label $sensitivityLabelFrame.lblColumnName -text "Low ----------------------------- Sensitivity ------------------------------ High" -background orange -compound left  
+	label $sensitivityLabelFrame.lblColumnName -text "Low ------------------------------- Penalty -------------------------------- High" -background orange -compound left  
 	pack $sensitivityLabelFrame.lblColumnName -padx 160 -side top -anchor nw
 	
 	global sw
@@ -353,9 +403,76 @@ proc setSensitivityLevel {} {
 	pack .buttonFrame.nextStep -padx 20 -pady 20
 	
 	#destroy previous frame and pack new frame
-	if {[winfo exists .metricFrame]} { destroy .metricFrame};
+	if {[winfo exists .qiLabelFrame]} { destroy .qiLabelFrame};
+	global swo
+	if {[winfo exists $swo]} { destroy $swo};
 	pack $sensitivityLabelFrame -side top -expand 1 -fill both
 	pack $sw -side top -expand 1 -fill both
+	pack .buttonFrame -side top -expand 1 -fill both
+};
+
+#Group Quasi-Identifiers
+proc setQuasiIdentifiers {} {	
+	global colNames welcomeFrame qiLabelFrame myFirstFile mySecondFile 
+	
+	set qiLabelFrame ".qiLabelFrame";
+	set qiFrame ".qiFrame";
+	
+	#the data of the first file is split into individual columns
+	splitIntoColumns $myFirstFile;
+	#the data of the second file is split into individual columns
+	splitIntoColns $mySecondFile;
+	
+	if {[winfo exists $qiLabelFrame]} { destroy $qiLabelFrame };
+	frame $qiLabelFrame -borderwidth 0 -background orange;
+	
+	if {[winfo exists $qiFrame]} { destroy $qiFrame };
+	frame $qiFrame -borderwidth 0 -background orange;
+	
+	#pack the welcome frame
+	pack $welcomeFrame -side top -expand true -fill both 
+	
+	#widgets in the window
+	#widget - upload file label
+	label $qiLabelFrame.lblColumns -text "Step : Group the Quasi-Identifier Columns" -background orange -compound left 
+	pack $qiLabelFrame.lblColumns  -padx 20 -pady 40 -side top
+	
+	label $qiLabelFrame.lblColumnName -text "Low ------------------------------- Penalty -------------------------------- High" -background orange -compound left  
+	pack $qiLabelFrame.lblColumnName -padx 160 -side top -anchor nw
+	
+	global swo
+	# Make a frame scrollable
+	set swo [ScrolledWindow .swo]
+
+	set sfr [ScrollableFrame $swo.sfr -background orange]
+
+	$swo setwidget $sfr
+
+	set ufo [$sfr getframe]
+
+	set i 0
+	# Now fill the frame, resize the window to see the scrollbars in action 
+    foreach x $colNames {
+		set qiCheckbox$i 0
+		set c [checkbutton $ufo.qiCheckbox$i -text $x -anchor nw -background orange];
+		#set c [scale $ufo.scale$i -label $x -orient horizontal -from 0 -to 100 -length 400 -showvalue 0 -tickinterval 10 -variable checkbox$i -background orange  -sliderrelief raised -width 8]
+		#pack $c -side top -anchor nw -expand false -padx 20 -pady 3;
+		puts "value of i here is $i"
+		grid $c -row $i -column 1 -padx 160
+		incr i
+	}
+	
+	if {[winfo exists .buttonFrame]} { destroy .buttonFrame };
+	frame .buttonFrame -borderwidth 0 -background orange;
+	
+	#widget - next step button
+	button .buttonFrame.nextStep -text "Next Step ->" -background lightgrey -command {setSensitivityLevel}
+	pack .buttonFrame.nextStep -padx 20 -pady 20
+	
+	#destroy previous frame and pack new frame
+	if {[winfo exists .metricFrame]} { destroy .metricFrame};
+	pack $qiLabelFrame -side top -expand 1 -fill both
+	pack $swo -side top -expand 1 -fill both
 	pack .buttonFrame -side top -expand 1 -fill both
 };
 
@@ -383,7 +500,7 @@ proc setMetricList {} {
 	pack $metricFrame.checkboxHidingFailure $metricFrame.checkboxMissesCost $metricFrame.checkboxLossMetric $metricFrame.checkboxClassificationMetric $metricFrame.checkboxDiscernibilityMetric -padx 20 -side top -expand 1 -fill both
 	
 	#widget - next step button
-	button $metricFrame.nextStep -text "Next Step ->" -background lightgrey -command {setSensitivityLevel}
+	button $metricFrame.nextStep -text "Next Step ->" -background lightgrey -command {setQuasiIdentifiers}
 	pack $metricFrame.nextStep -padx 20 -pady 20 
 	
 	#destroy previous frames and pack new frame
