@@ -30,7 +30,7 @@ proc setSensitiveArray {} {
 	#loop to create dynamic variables
 	for {set i 0} {$i < [expr [llength $colNames]]} {incr i} {
 		global checkbox$i
-		puts "Value in Checkbox $i is [set checkbox$i]"
+		#puts "Value in Checkbox $i is [set checkbox$i]"
 		set val [set checkbox$i]
 		dict lappend mySensitiveArray $i $val
 	}
@@ -39,23 +39,38 @@ proc setSensitiveArray {} {
 }
 
 proc setQIArray {} {
-	global colNames myQIArray
+	global colNames myQIArray maxPenalty
 
 	#a dictionary containing the QI, as given by the user
-	set myQIArray [dict create "column_name" "checkboxValue"]
+	#set myQIArray
 	
 	#loop to create dynamic variables
-	for {set j 0} {$j < [expr [llength $colNames]]} {incr j} {
-		global qiCheckbox$j
-		puts "Value in qiCheckbox $j is [set qiCheckbox$j]"
-		set val [set qiCheckbox$j]
-		dict lappend myQIArray $j $val
+	for {set i 0} {$i < [expr [llength $colNames]]} {incr i} {
+		global qiCheckbox$i
+		set val [set qiCheckbox$i]	
+		dict lappend myQIArray $i $val
 	}
-	#set vvv [dict get $myQIArray 3]
-	#puts "Vineet - 3rd column value is [dict get $myQIArray 3]"
-
+	
+	#call procedure to obtain the maximum penalty of the QI
+	getMaxQIPenalty;
 }
 
+proc getMaxQIPenalty {} {
+	global colNames myQIArray maxPenalty
+
+	#loop to create the list of QI elements
+	for {set i 0} {$i < [expr [llength $colNames]]} {incr i} {
+		set val [dict get $myQIArray $i]	
+		if {$val == 1} {
+			global checkbox$i
+			set val [expr [set checkbox$i] * 1.0]
+			lappend myScaleList $val
+		}
+	}
+	set myScaleList [lsort -real $myScaleList]
+	#set maxPenalty [expr {max($myScaleList)}]
+	set maxPenalty [lindex $myScaleList end]
+}
 
 # calculates misses cost as defined by Oliveira in his paper, discussed further in the report submitted
 proc checkEachElement {col1 coln1} {  
@@ -81,7 +96,7 @@ proc checkEachElement {col1 coln1} {
 				}
 			}
 	}
-	puts "nonSensitiveElementDifference =$sensitiveElementDifference sensitiveElementDifference = $sensitiveElementDifference numberOfSensitiveElements=$numberOfSensitiveElements numberOfNonSensitiveElements=$numberOfNonSensitiveElements"
+	#puts "nonSensitiveElementDifference =$sensitiveElementDifference sensitiveElementDifference = $sensitiveElementDifference numberOfSensitiveElements=$numberOfSensitiveElements numberOfNonSensitiveElements=$numberOfNonSensitiveElements"
 };
 
 
@@ -109,11 +124,11 @@ proc getHidingFailure {} {
 		}
 	}
 	
-	puts "Vineet - Valueof sensitiveCounter is $sensitiveCounter , value of count is $count, value of length is [expr [llength $col0]] , originalColumn is $originalColumn , sanitizedColumn is $sanitizedColumn"
+	#puts "Vineet - Valueof sensitiveCounter is $sensitiveCounter , value of count is $count, value of length is [expr [llength $col0]] , originalColumn is $originalColumn , sanitizedColumn is $sanitizedColumn"
 	
 	set hidingFailure [expr (($count * 100.00 )/ ([llength $col0] * $sensitiveCounter))]
-	puts "Vineet - 3rd column value is [dict get $mySensitiveArray 3]"
-	puts "Vineet - 3rd column value is [dict get $myQIArray 3]"
+	#puts "Vineet - 3rd column value is [dict get $mySensitiveArray 3]"
+	#puts "Vineet - 3rd column value is [dict get $myQIArray 3]"
 };
 
 # calculates UTILITY (misses cost) as defined by Oliveira in his paper, discussed further in the report submitted
@@ -146,7 +161,7 @@ proc getMissesCost {} {
 # calculates ACCURACY OR DATA QUALLITY(information loss) as defined by Oliveira in his paper, discussed further in the report submitted
 proc getInformationLoss {} {  
 	global informationLoss col1 coln1 mySensitiveArray
-	puts "Vineet - 3rd column value is [dict get $mySensitiveArray 3]"
+	#puts "Vineet - 3rd column value is [dict get $mySensitiveArray 3]"
 	set count 0
 	foreach a $col1 b $coln1 {
 		if { $a != $b } {
@@ -233,7 +248,7 @@ proc splitIntoColumns {filename} {
 	set line [gets $f]
 	set file_data [read $f]
 	close $f
-	puts "Delimiter is $delimiter"
+	#puts "Delimiter is $delimiter"
 	set data [split $file_data "\n"]
     foreach {line} $data {
 		set csvdata [split $line $delimiter]
@@ -245,17 +260,17 @@ proc splitIntoColumns {filename} {
 		}
 	}
 	
-	puts "The summation of the first column is [ladd $col0]"
+	#puts "The summation of the first column is [ladd $col0]"
 	
 	#debugging
-	puts "Col : $col0"
-	puts "Col : $col1"
-	puts "Col : $col2"
-	puts "Col : $col3"
-	puts "Col : $col4"
-	puts "Col : $col5"
-	puts "Col : $col6"
-	puts "Col : $col7"
+	#puts "Col : $col0"
+	#puts "Col : $col1"
+	#puts "Col : $col2"
+	#puts "Col : $col3"
+	#puts "Col : $col4"
+	#puts "Col : $col5"
+	#puts "Col : $col6"
+	#puts "Col : $col7"
 };
 
 #proc to split the second file data into columns
@@ -266,7 +281,7 @@ proc splitIntoColns {filename} {
 	set line [gets $f]
 	set file_data [read $f]
 	close $f
-	puts "Delimiter is $delimiter"
+	#puts "Delimiter is $delimiter"
 	set data [split $file_data "\n"]
     foreach {line} $data {
 		set csvdata [split $line $delimiter]
@@ -278,14 +293,14 @@ proc splitIntoColns {filename} {
 		}
 	}
 	#debugging
-	puts "Coln : $coln0"
-	puts "Coln : $coln1"
-	puts "Coln : $coln2"
-	puts "Coln : $coln3"
-	puts "Coln : $coln4"
-	puts "Coln : $coln5"
-	puts "Coln : $coln6"
-	puts "Coln : $coln7"
+	#puts "Coln : $coln0"
+	#puts "Coln : $coln1"
+	#puts "Coln : $coln2"
+	#puts "Coln : $coln3"
+	#puts "Coln : $coln4"
+	#puts "Coln : $coln5"
+	#puts "Coln : $coln6"
+	#puts "Coln : $coln7"
 };
  
 #proc to open first file
@@ -295,7 +310,7 @@ proc openFile1 {} {
 
 	set myFirstFile [tk_getOpenFile]
 
-	puts stdout [format "%s:myFirstFile=<%s>" $fn $myFirstFile]
+	#puts stdout [format "%s:myFirstFile=<%s>" $fn $myFirstFile]
 
 	set fileID [open $myFirstFile r]
 
@@ -307,13 +322,13 @@ proc openFile1 {} {
 	
 	#number of columns in the file
 	set numCols [llength  $colNames ]
-	puts "Number of columns in $colNames is $numCols" 
+	#puts "Number of columns in $colNames is $numCols" 
 	
 	#populates the textarea with new information
 	set i 1
 	$t.text1 delete 1.0 end
 	while { [gets $fileID line] >= 0 } {
-		puts stdout [format "line(%d)=%s" $i $line]
+		#puts stdout [format "line(%d)=%s" $i $line]
 		$t.text1 insert end [format "%s\n" $line]
 		incr i
 		} ;
@@ -328,7 +343,7 @@ proc openFile2 {} {
 
 	set mySecondFile [tk_getOpenFile]
 
-	puts stdout [format "%s:myFile=<%s>" $fn $mySecondFile]
+	#puts stdout [format "%s:myFile=<%s>" $fn $mySecondFile]
 
 	set fileID [open $mySecondFile r]
 	
@@ -336,7 +351,7 @@ proc openFile2 {} {
 	set i 1
 	$t.text2 delete 1.0 end
 	while { [gets $fileID line] >= 0 } {
-		puts stdout [format "line(%d)=%s" $i $line]
+		#puts stdout [format "line(%d)=%s" $i $line]
 		$t.text2 insert end [format "%s\n" $line]
 		incr i
 		} ;
@@ -367,7 +382,7 @@ proc setSensitivityLevel {} {
 	
 	#widgets in the window
 	#widget - upload file label
-	label $sensitivityLabelFrame.lblColumns -text "Step : Choose the privacy level for each of the columns making them Sensitive or Non-Sensitive." -background orange -compound left 
+	label $sensitivityLabelFrame.lblColumns -text "Step : Choose a penalty for each of the columns. Zero penalty makes the attribute Non-Sensitive. HIgher the penalty, higher the Sensitivity" -background orange -compound left 
 	pack $sensitivityLabelFrame.lblColumns  -padx 20 -pady 40 -side top
 	
 	label $sensitivityLabelFrame.lblColumnName -text "Low ------------------------------- Penalty -------------------------------- High" -background orange -compound left  
@@ -390,7 +405,7 @@ proc setSensitivityLevel {} {
 		#set c [checkbutton $sensitivityLabelFrame.checkbox$i -text $x -anchor nw -background orange];
 		set c [scale $uf.scale$i -label $x -orient horizontal -from 0 -to 100 -length 400 -showvalue 0 -tickinterval 10 -variable checkbox$i -background orange  -sliderrelief raised -width 8]
 		#pack $c -side top -anchor nw -expand false -padx 20 -pady 3;
-		puts "value of i here is $i"
+		#puts "value of i here is $i"
 		grid $c -row $i -column 1 -padx 160
 		incr i
 	}
@@ -437,9 +452,6 @@ proc setQuasiIdentifiers {} {
 	label $qiLabelFrame.lblColumns -text "Step : Group the Quasi-Identifier Columns" -background orange -compound left 
 	pack $qiLabelFrame.lblColumns  -padx 20 -pady 40 -side top
 	
-	label $qiLabelFrame.lblColumnName -text "Low ------------------------------- Penalty -------------------------------- High" -background orange -compound left  
-	pack $qiLabelFrame.lblColumnName -padx 160 -side top -anchor nw
-	
 	global swo
 	# Make a frame scrollable
 	set swo [ScrolledWindow .swo]
@@ -454,11 +466,11 @@ proc setQuasiIdentifiers {} {
 	# Now fill the frame, resize the window to see the scrollbars in action 
     foreach x $colNames {
 		set qiCheckbox$i 0
-		set c [checkbutton $ufo.qiCheckbox$i -text $x -anchor nw -background orange];
+		set c [checkbutton $ufo.qiCheckbox$i -text $x -anchor nw -background orange -compound left];
 		#set c [scale $ufo.scale$i -label $x -orient horizontal -from 0 -to 100 -length 400 -showvalue 0 -tickinterval 10 -variable checkbox$i -background orange  -sliderrelief raised -width 8]
 		#pack $c -side top -anchor nw -expand false -padx 20 -pady 3;
-		puts "value of i here is $i"
-		grid $c -row $i -column 1 -padx 160
+		#puts "value of i here is $i"
+		grid $c -row $i -column 0 -padx 280 -pady 10
 		incr i
 	}
 	
