@@ -21,7 +21,8 @@ set nonSensitiveElementDifference 0
 set numberOfSensitiveElements 0
 set numberOfNonSensitiveElements 0
 
-proc setSensitiveArray {} {
+#procedure to create a list containing the penalty values of each attribute
+proc setPenaltyArray {} {
 	global colNames mySensitiveArray
 	
 	#a dictionary containing level of sensitivity of each column, as given by the user
@@ -30,35 +31,32 @@ proc setSensitiveArray {} {
 	#loop to create dynamic variables
 	for {set i 0} {$i < [expr [llength $colNames]]} {incr i} {
 		global checkbox$i
-		#puts "Value in Checkbox $i is [set checkbox$i]"
 		set val [set checkbox$i]
 		dict lappend mySensitiveArray $i $val
 	}
-	#set vvv [dict get $mySensitiveArray 3]
-	#puts "Vineet - 3rd column value is [dict get $mySensitiveArray 3]"
 }
 
+#procedure to create a list containing the Quasi Identifiers
 proc setQIArray {} {
 	global colNames myQIArray maxPenalty
 
-	#a dictionary containing the QI, as given by the user
-	#set myQIArray
-	
 	#loop to create dynamic variables
 	for {set i 0} {$i < [expr [llength $colNames]]} {incr i} {
 		global qiCheckbox$i
+		#a dictionary containing the QI, as given by the user
 		set val [set qiCheckbox$i]	
 		dict lappend myQIArray $i $val
 	}
 	
-	#call procedure to obtain the maximum penalty of the QI
+	#call procedure to obtain the maximum penalty of the Quasi Identifiers
 	getMaxQIPenalty;
 }
 
+#procedure to obtain the maximum penalty value of the quasi identifiers
 proc getMaxQIPenalty {} {
 	global colNames myQIArray maxPenalty
 
-	#loop to create the list of QI elements
+	#loop to fetch the list of QI attributes
 	for {set i 0} {$i < [expr [llength $colNames]]} {incr i} {
 		set val [dict get $myQIArray $i]	
 		if {$val == 1} {
@@ -68,37 +66,8 @@ proc getMaxQIPenalty {} {
 		}
 	}
 	set myScaleList [lsort -real $myScaleList]
-	#set maxPenalty [expr {max($myScaleList)}]
 	set maxPenalty [lindex $myScaleList end]
 }
-
-# calculates misses cost as defined by Oliveira in his paper, discussed further in the report submitted
-proc checkEachElement {col1 coln1} {  
-	global sensitiveElementDifference nonSensitiveElementDifference numberOfSensitiveElements numberOfNonSensitiveElements
-	#check if the length of both columns are the same
-	if {[llength $col1] == [llength $coln1]} {
-			foreach elem1 $col1 elem2 $coln1 {
-				incr numberOfSensitiveElements
-				#compares each element of the two columns
-				if {$elem1 != $elem2} {
-					incr sensitiveElementDifference
-				}
-			}
-	}
-	#do a check if the column is non-sensitive
-	#check is the length of both columns are the same
-	if {[llength $col1] == [llength $coln1]} {
-			foreach elem1 $col1 elem2 $coln1 {
-				incr numberOfNonSensitiveElements
-				#compares each element of the two columns
-				if {$elem1 != $elem2} {
-					incr nonSensitiveElementDifference
-				}
-			}
-	}
-	#puts "nonSensitiveElementDifference =$sensitiveElementDifference sensitiveElementDifference = $sensitiveElementDifference numberOfSensitiveElements=$numberOfSensitiveElements numberOfNonSensitiveElements=$numberOfNonSensitiveElements"
-};
-
 
 # calculates PRIVACY (hiding failure) as defined by Oliveira in his paper, discussed further in the report submitted
 proc getHidingFailure {} {  
@@ -122,13 +91,10 @@ proc getHidingFailure {} {
 				} 
 			}
 		}
+	}	
+	if {$sensitiveCounter > 0} {
+		set hidingFailure [expr (($count * 100.00 )/ ([llength $col0] * $sensitiveCounter))]
 	}
-	
-	#puts "Vineet - Valueof sensitiveCounter is $sensitiveCounter , value of count is $count, value of length is [expr [llength $col0]] , originalColumn is $originalColumn , sanitizedColumn is $sanitizedColumn"
-	
-	set hidingFailure [expr (($count * 100.00 )/ ([llength $col0] * $sensitiveCounter))]
-	#puts "Vineet - 3rd column value is [dict get $mySensitiveArray 3]"
-	#puts "Vineet - 3rd column value is [dict get $myQIArray 3]"
 };
 
 # calculates UTILITY (misses cost) as defined by Oliveira in his paper, discussed further in the report submitted
@@ -155,13 +121,14 @@ proc getMissesCost {} {
 			}
 		}
 	}
-	set missesCost [expr (($count * 100.00 )/ ([llength $col0] * $nonSensitiveCounter))]
+	if {$nonSensitiveCounter > 0} {
+		set missesCost [expr (($count * 100.00 )/ ([llength $col0] * $nonSensitiveCounter))]
+	}
 };
 
 # calculates ACCURACY OR DATA QUALLITY(information loss) as defined by Oliveira in his paper, discussed further in the report submitted
 proc getInformationLoss {} {  
 	global informationLoss col1 coln1 mySensitiveArray
-	#puts "Vineet - 3rd column value is [dict get $mySensitiveArray 3]"
 	set count 0
 	foreach a $col1 b $coln1 {
 		if { $a != $b } {
@@ -177,7 +144,7 @@ proc analyze {} {
 	set resultsFrame ".resultsFrame";
 	
 	#sets the values given by user into a global array mySensitiveArray
-	setSensitiveArray;
+	setPenaltyArray;
 	
 	#sets the QI groups given by user into a global array myQIArray
 	setQIArray;
@@ -186,14 +153,13 @@ proc analyze {} {
 	getMissesCost;
 	
 	#computes information loss
-	getInformationLoss;
+	#getInformationLoss;
 	
 	#computes hiding Failure
 	getHidingFailure;
 	
 	#compares each element of the two lists passed
-	checkEachElement $col1 $coln1;
-	
+	#checkEachElement $col1 $coln1;
 	
 	if {[winfo exists $analyzeFrame]} { destroy $analyzeFrame };
 	frame $analyzeFrame -borderwidth 10 -background orange;
@@ -259,18 +225,6 @@ proc splitIntoColumns {filename} {
 			incr i			
 		}
 	}
-	
-	#puts "The summation of the first column is [ladd $col0]"
-	
-	#debugging
-	#puts "Col : $col0"
-	#puts "Col : $col1"
-	#puts "Col : $col2"
-	#puts "Col : $col3"
-	#puts "Col : $col4"
-	#puts "Col : $col5"
-	#puts "Col : $col6"
-	#puts "Col : $col7"
 };
 
 #proc to split the second file data into columns
@@ -292,15 +246,6 @@ proc splitIntoColns {filename} {
 			incr i			
 		}
 	}
-	#debugging
-	#puts "Coln : $coln0"
-	#puts "Coln : $coln1"
-	#puts "Coln : $coln2"
-	#puts "Coln : $coln3"
-	#puts "Coln : $coln4"
-	#puts "Coln : $coln5"
-	#puts "Coln : $coln6"
-	#puts "Coln : $coln7"
 };
  
 #proc to open first file
@@ -382,7 +327,7 @@ proc setSensitivityLevel {} {
 	
 	#widgets in the window
 	#widget - upload file label
-	label $sensitivityLabelFrame.lblColumns -text "Step : Choose a penalty for each of the columns. Zero penalty makes the attribute Non-Sensitive. HIgher the penalty, higher the Sensitivity" -background orange -compound left 
+	label $sensitivityLabelFrame.lblColumns -text "Step 6 : Choose a penalty for each of the columns. Zero penalty makes the attribute Non-Sensitive. HIgher the penalty, higher the Sensitivity" -background orange -compound left 
 	pack $sensitivityLabelFrame.lblColumns  -padx 20 -pady 40 -side top
 	
 	label $sensitivityLabelFrame.lblColumnName -text "Low ------------------------------- Penalty -------------------------------- High" -background orange -compound left  
@@ -449,7 +394,7 @@ proc setQuasiIdentifiers {} {
 	
 	#widgets in the window
 	#widget - upload file label
-	label $qiLabelFrame.lblColumns -text "Step : Group the Quasi-Identifier Columns" -background orange -compound left 
+	label $qiLabelFrame.lblColumns -text "Step 5 : Group the Quasi-Identifier Columns" -background orange -compound left 
 	pack $qiLabelFrame.lblColumns  -padx 20 -pady 40 -side top
 	
 	global swo
@@ -463,7 +408,7 @@ proc setQuasiIdentifiers {} {
 	set ufo [$sfr getframe]
 
 	set i 0
-	# Now fill the frame, resize the window to see the scrollbars in action 
+	# Frame is filled with a list of checkboxes 
     foreach x $colNames {
 		set qiCheckbox$i 0
 		set c [checkbutton $ufo.qiCheckbox$i -text $x -anchor nw -background orange -compound left];
@@ -500,7 +445,7 @@ proc setMetricList {} {
 	pack $welcomeFrame -side top -expand true -fill both 
 	
 	#widgets in the window
-	label $metricFrame.lblDelimiter -text "Step : Select the metrics to be calculated" -background orange -compound left 
+	label $metricFrame.lblDelimiter -text "Step 4 : Select the metrics to be calculated" -background orange -compound left 
 	pack $metricFrame.lblDelimiter  -padx 20
 
 	#widget - checkbox list of metrics
@@ -536,7 +481,7 @@ proc getDelimiter {} {
 	
 	#widgets in the window
 	#widget - specify delimiter
-	label $delimiterFrame.lblDelimiter -text "Step : Specify a delimiter" -background orange -compound left 
+	label $delimiterFrame.lblDelimiter -text "Step 3 : Specify a delimiter" -background orange -compound left 
 	pack $delimiterFrame.lblDelimiter  -padx 20
 
 	#widget - delimiter entry field
