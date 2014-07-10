@@ -3,14 +3,14 @@
 package require Tk
 package require BWidget
 
-#default values
-#contains column names
+# default values
+# contains column names
 set colNames ""
 
-#empty sensitive array
+# empty sensitive array
 set sensitiveArray [list]
 
-#default values of metrics
+# default values of metrics
 set missesCost 0.0
 set informationLoss 0.0
 set hidingFailure 0.0
@@ -21,14 +21,14 @@ set nonSensitiveElementDifference 0
 set numberOfSensitiveElements 0
 set numberOfNonSensitiveElements 0
 
-#procedure to create a list containing the penalty values of each attribute
+# procedure to create a list containing the penalty values of each attribute
 proc setPenaltyArray {} {
 	global colNames mySensitiveArray
 	
-	#a dictionary containing level of sensitivity of each column, as given by the user
+	# a dictionary containing level of sensitivity of each column, as given by the user
 	set mySensitiveArray [dict create "column_name" "sensitivity"]
 	
-	#loop to create dynamic variables
+	# loop to create dynamic variables
 	for {set i 0} {$i < [expr [llength $colNames]]} {incr i} {
 		global checkbox$i
 		set val [set checkbox$i]
@@ -36,27 +36,27 @@ proc setPenaltyArray {} {
 	}
 }
 
-#procedure to create a list containing the Quasi Identifiers
+# procedure to create a list containing the Quasi Identifiers
 proc setQIArray {} {
 	global colNames myQIArray maxPenalty
 
-	#loop to create dynamic variables
+	# loop to create dynamic variables
 	for {set i 0} {$i < [expr [llength $colNames]]} {incr i} {
 		global qiCheckbox$i
-		#a dictionary containing the QI, as given by the user
+		# a dictionary containing the QI, as given by the user
 		set val [set qiCheckbox$i]	
 		dict lappend myQIArray $i $val
 	}
 	
-	#call procedure to obtain the maximum penalty of the Quasi Identifiers
+	# call procedure to obtain the maximum penalty of the Quasi Identifiers
 	getMaxQIPenalty;
 }
 
-#procedure to obtain the maximum penalty value of the quasi identifiers
+# procedure to obtain the maximum penalty value of the quasi identifiers
 proc getMaxQIPenalty {} {
 	global colNames myQIArray maxPenalty
 
-	#loop to fetch the list of QI attributes
+	# loop to fetch the list of QI attributes
 	for {set i 0} {$i < [expr [llength $colNames]]} {incr i} {
 		set val [dict get $myQIArray $i]	
 		if {$val == 1} {
@@ -71,15 +71,15 @@ proc getMaxQIPenalty {} {
 
 # calculates PRIVACY (hiding failure) as defined by Oliveira in his paper, discussed further in the report submitted
 proc getHidingFailure {} {  
-	#find the number of sensitive elements that have been revealed
+	# find the number of sensitive elements that have been revealed
 	global hidingFailure mySensitiveArray myQIArray numCols
 	
 	set count 0
 	set sensitiveCounter 0
 	for {set i 0} {$i < $numCols} {incr i} {
-		#setting up dynamic global variables
+		# setting up dynamic global variables
 		global col$i coln$i
-		#check if the column is sensitive only then
+		# check if the column is sensitive only then
 		set value [dict get $mySensitiveArray $i]
 		if {$value > 0} {
 			incr sensitiveCounter
@@ -99,16 +99,16 @@ proc getHidingFailure {} {
 
 # calculates UTILITY (misses cost) as defined by Oliveira in his paper, discussed further in the report submitted
 proc getMissesCost {} {
-	#misses cost measures the percentage of non-restrictive patterns that are hidden after sanitization  
+	# misses cost measures the percentage of non-restrictive patterns that are hidden after sanitization  
 	global missesCost mySensitiveArray myQIArray numCols
 	
 	set count 0
 	set nonSensitiveCounter 0
 	
 	for {set i 0} {$i < $numCols} {incr i} {
-		#setting up dynamic global variables
+		# setting up dynamic global variables
 		global col$i coln$i
-		#check if the column is non-sensitive only then
+		# check if the column is non-sensitive only then
 		set value [dict get $mySensitiveArray $i]
 		if {$value == 0} {
 			incr nonSensitiveCounter
@@ -143,46 +143,46 @@ proc analyze {} {
 	set analyzeFrame ".analyzeFrame";
 	set resultsFrame ".resultsFrame";
 	
-	#sets the values given by user into a global array mySensitiveArray
+	# sets the values given by user into a global array mySensitiveArray
 	setPenaltyArray;
 	
-	#sets the QI groups given by user into a global array myQIArray
+	# sets the QI groups given by user into a global array myQIArray
 	setQIArray;
 	
-	#computes misses cost
+	# computes misses cost
 	getMissesCost;
 	
-	#computes information loss
+	# computes information loss
 	#getInformationLoss;
 	
-	#computes hiding Failure
+	# computes hiding Failure
 	getHidingFailure;
 	
-	#compares each element of the two lists passed
+	# compares each element of the two lists passed
 	#checkEachElement $col1 $coln1;
 	
 	if {[winfo exists $analyzeFrame]} { destroy $analyzeFrame };
 	frame $analyzeFrame -borderwidth 10 -background orange;
 	
-	#pack the welcome frame
+	# pack the welcome frame
 	pack $welcomeFrame -side top -expand true -fill both
 	
 	if {[winfo exists $resultsFrame]} { destroy $resultsFrame };
 	frame $resultsFrame -borderwidth 10 -background orange;
 	
-	#widgets in the window
+	# widgets in the window
 	label $resultsFrame.lbl10 -text "Analysis and Results" -background orange -compound left -font {Helvetica 14} 
 	label $resultsFrame.lbl11 -text "Hiding Failure (HF) is the percentage of sensitive information that can still be effectively discovered after sanitizing the data" -background orange -compound left -font {Times 10}
 	label $resultsFrame.lbl12 -text "Misses cost (MC) measures the percentage of non-sensitive information that is hidden after the sanitization process." -background orange -compound left -font {Times 10}
 	label $resultsFrame.lbl13 -text "PRIVACY (hiding failure) and UTILITY (misses cost) of the sanitized file is calculated." -background orange -compound left -font {Times 10}
 	pack $resultsFrame.lbl10 $resultsFrame.lbl13 $resultsFrame.lbl11 $resultsFrame.lbl12  -expand true -fill both -padx 10 -pady 10 -side top
 	
-	#widget - list of metrics
+	# widget - list of metrics
 	label $analyzeFrame.lbl7 -text "Hiding Failure - [format "%.2f" $hidingFailure] %" -background orange -compound left 
 	label $analyzeFrame.lbl8 -text "Misses Cost - [format "%.2f" $missesCost] %" -background orange -compound left  
 	pack $analyzeFrame.lbl7 $analyzeFrame.lbl8 -padx 20 -side left -expand true -fill both
  
-	#destroy previous frames and packs the new frame
+	# destroy previous frames and packs the new frame
 	global sw
 	if {[winfo exists $sw]} { destroy $sw};
 	if {[winfo exists .sensitivityLabelFrame]} { destroy .sensitivityLabelFrame };
@@ -191,11 +191,11 @@ proc analyze {} {
 	pack $resultsFrame -expand true -fill both -side top
 	pack $analyzeFrame -side left -expand true -fill both
 	
-	#call proc to draw bar chart with calculated values
+	# call proc to draw bar chart with calculated values
 	createBarChart;
 };
 
-#proc to get the first line of the file
+# proc to get the first line of the file
 proc getFirstLineFromFile {filename} {
 	set f [open $filename r]
     set line [gets $f]
@@ -203,18 +203,17 @@ proc getFirstLineFromFile {filename} {
     return $line
 };
 
-#proc to get arithmetic sum of elements in a list
+# proc to get arithmetic sum of elements in a list
 proc ladd L {expr [join $L +]+0}
 
-#proc to split the first file data into columns
+# proc to split the first file data into columns
 proc splitIntoColumns {filename} {
 	global numCols delimiter
 	set f [open $filename r]	
-	#the first line containing header names is skipped
+	# the first line containing header names is skipped
 	set line [gets $f]
 	set file_data [read $f]
 	close $f
-	#puts "Delimiter is $delimiter"
 	set data [split $file_data "\n"]
     foreach {line} $data {
 		set csvdata [split $line $delimiter]
@@ -227,15 +226,14 @@ proc splitIntoColumns {filename} {
 	}
 };
 
-#proc to split the second file data into columns
+# proc to split the second file data into columns
 proc splitIntoColns {filename} {
 	global numCols delimiter
 	set f [open $filename r]	
-	#the first line containing header names is skipped
+	# the first line containing header names is skipped
 	set line [gets $f]
 	set file_data [read $f]
 	close $f
-	#puts "Delimiter is $delimiter"
 	set data [split $file_data "\n"]
     foreach {line} $data {
 		set csvdata [split $line $delimiter]
@@ -248,28 +246,28 @@ proc splitIntoColns {filename} {
 	}
 };
  
-#proc to open first file
+# proc to open first file
 proc openFile1 {} {
 	set fn "openFile1"
 	global t colNames numCols myFirstFile
 
 	set myFirstFile [tk_getOpenFile]
 
-	#puts stdout [format "%s:myFirstFile=<%s>" $fn $myFirstFile]
+	# puts stdout [format "%s:myFirstFile=<%s>" $fn $myFirstFile]
 
 	set fileID [open $myFirstFile r]
 
-	#fetch first line from the file - header names
+	# fetch first line from the file - header names
 	set firstLine [getFirstLineFromFile $myFirstFile]
 
-	#split first line into column names
+	# split first line into column names
 	set colNames [split $firstLine ,]
 	
-	#number of columns in the file
+	# number of columns in the file
 	set numCols [llength  $colNames ]
 	#puts "Number of columns in $colNames is $numCols" 
 	
-	#populates the textarea with new information
+	# populates the textarea with new information
 	set i 1
 	$t.text1 delete 1.0 end
 	while { [gets $fileID line] >= 0 } {
@@ -292,7 +290,7 @@ proc openFile2 {} {
 
 	set fileID [open $mySecondFile r]
 	
-	#populates the textarea with new information
+	# populates the textarea with new information
 	set i 1
 	$t.text2 delete 1.0 end
 	while { [gets $fileID line] >= 0 } {
@@ -304,16 +302,16 @@ proc openFile2 {} {
 	close $fileID
 };
 
-#Selecting the columns with sensitive information
+# Selecting the columns with sensitive information
 proc setSensitivityLevel {} {	
 	global colNames welcomeFrame sensitivityLabelFrame myFirstFile mySecondFile
 	
 	set sensitivityLabelFrame ".sensitivityLabelFrame";
 	set sensitivityFrame ".sensitivityFrame";
 	
-	#the data of the first file is split into individual columns
+	# the data of the first file is split into individual columns
 	splitIntoColumns $myFirstFile;
-	#the data of the second file is split into individual columns
+	# the data of the second file is split into individual columns
 	splitIntoColns $mySecondFile;
 	
 	if {[winfo exists $sensitivityLabelFrame]} { destroy $sensitivityLabelFrame };
@@ -322,11 +320,11 @@ proc setSensitivityLevel {} {
 	if {[winfo exists $sensitivityFrame]} { destroy $sensitivityFrame };
 	frame $sensitivityFrame -borderwidth 0 -background orange;
 	
-	#pack the welcome frame
+	# pack the welcome frame
 	pack $welcomeFrame -side top -expand true -fill both 
 	
-	#widgets in the window
-	#widget - upload file label
+	# widgets in the window
+	# widget - upload file label
 	label $sensitivityLabelFrame.lblColumns -text "Step 6 : Choose a penalty for each of the columns. Zero penalty makes the attribute Non-Sensitive. HIgher the penalty, higher the Sensitivity" -background orange -compound left 
 	pack $sensitivityLabelFrame.lblColumns  -padx 20 -pady 40 -side top
 	
@@ -358,11 +356,11 @@ proc setSensitivityLevel {} {
 	if {[winfo exists .buttonFrame]} { destroy .buttonFrame };
 	frame .buttonFrame -borderwidth 0 -background orange;
 	
-	#widget - next step button
+	# widget - next step button
 	button .buttonFrame.nextStep -text "Final Step - Analyze" -background lightgrey -command {analyze}
 	pack .buttonFrame.nextStep -padx 20 -pady 20
 	
-	#destroy previous frame and pack new frame
+	# destroy previous frame and pack new frame
 	if {[winfo exists .qiLabelFrame]} { destroy .qiLabelFrame};
 	global swo
 	if {[winfo exists $swo]} { destroy $swo};
@@ -371,16 +369,16 @@ proc setSensitivityLevel {} {
 	pack .buttonFrame -side top -expand 1 -fill both
 };
 
-#Group Quasi-Identifiers
+# Group Quasi-Identifiers
 proc setQuasiIdentifiers {} {	
 	global colNames welcomeFrame qiLabelFrame myFirstFile mySecondFile 
 	
 	set qiLabelFrame ".qiLabelFrame";
 	set qiFrame ".qiFrame";
 	
-	#the data of the first file is split into individual columns
+	# the data of the first file is split into individual columns
 	splitIntoColumns $myFirstFile;
-	#the data of the second file is split into individual columns
+	# the data of the second file is split into individual columns
 	splitIntoColns $mySecondFile;
 	
 	if {[winfo exists $qiLabelFrame]} { destroy $qiLabelFrame };
@@ -389,11 +387,11 @@ proc setQuasiIdentifiers {} {
 	if {[winfo exists $qiFrame]} { destroy $qiFrame };
 	frame $qiFrame -borderwidth 0 -background orange;
 	
-	#pack the welcome frame
+	# pack the welcome frame
 	pack $welcomeFrame -side top -expand true -fill both 
 	
-	#widgets in the window
-	#widget - upload file label
+	# widgets in the window
+	# widget - upload file label
 	label $qiLabelFrame.lblColumns -text "Step 5 : Group the Quasi-Identifier Columns" -background orange -compound left 
 	pack $qiLabelFrame.lblColumns  -padx 20 -pady 40 -side top
 	
@@ -422,18 +420,18 @@ proc setQuasiIdentifiers {} {
 	if {[winfo exists .buttonFrame]} { destroy .buttonFrame };
 	frame .buttonFrame -borderwidth 0 -background orange;
 	
-	#widget - next step button
+	# widget - next step button
 	button .buttonFrame.nextStep -text "Next Step ->" -background lightgrey -command {setSensitivityLevel}
 	pack .buttonFrame.nextStep -padx 20 -pady 20
 	
-	#destroy previous frame and pack new frame
+	# destroy previous frame and pack new frame
 	if {[winfo exists .metricFrame]} { destroy .metricFrame};
 	pack $qiLabelFrame -side top -expand 1 -fill both
 	pack $swo -side top -expand 1 -fill both
 	pack .buttonFrame -side top -expand 1 -fill both
 };
 
-#select the metrics
+# select the metrics
 proc setMetricList {} {
 	global delimiterFrame metricList welcomeFrame metricFrame checkboxHidingFailure checkboxMissesCost checkboxLossMetric checkboxClassificationMetric checkboxDiscernibilityMetric
 	
@@ -441,14 +439,14 @@ proc setMetricList {} {
 	if {[winfo exists $metricFrame]} { destroy $metricFrame };
 	frame $metricFrame -borderwidth 10 -background orange;
 	
-	#pack the welcome frame
+	# pack the welcome frame
 	pack $welcomeFrame -side top -expand true -fill both 
 	
-	#widgets in the window
+	# widgets in the window
 	label $metricFrame.lblDelimiter -text "Step 4 : Select the metrics to be calculated" -background orange -compound left 
 	pack $metricFrame.lblDelimiter  -padx 20
 
-	#widget - checkbox list of metrics
+	# widget - checkbox list of metrics
 	checkbutton $metricFrame.checkboxHidingFailure -text {Hiding Failure} -anchor nw -background orange -compound left 
 	checkbutton $metricFrame.checkboxMissesCost -text {Misses Cost} -anchor nw -background orange -compound left 
 	checkbutton $metricFrame.checkboxLossMetric -text {Loss Metric} -anchor nw -background orange -state disabled -compound left 
@@ -456,43 +454,43 @@ proc setMetricList {} {
 	checkbutton $metricFrame.checkboxDiscernibilityMetric -text {Discernibility Metric} -anchor nw -background orange -state disabled -compound left 
 	pack $metricFrame.checkboxHidingFailure $metricFrame.checkboxMissesCost $metricFrame.checkboxLossMetric $metricFrame.checkboxClassificationMetric $metricFrame.checkboxDiscernibilityMetric -padx 20 -side top -expand 1 -fill both
 	
-	#widget - next step button
+	# widget - next step button
 	button $metricFrame.nextStep -text "Next Step ->" -background lightgrey -command {setQuasiIdentifiers}
 	pack $metricFrame.nextStep -padx 20 -pady 20 
 	
-	#destroy previous frames and pack new frame
+	# destroy previous frames and pack new frame
 	if {[winfo exists $delimiterFrame]} { destroy $delimiterFrame };
 	pack $metricFrame -side top -expand true -fill both
 }
 
-#selecting the delimiter
+# selecting the delimiter
 proc getDelimiter {} {
 	global delimiterFrame welcomeFrame
 	
-	#contains the delimiter, default set to comma
+	# contains the delimiter, default set to comma
 	set delimiter ","
 	
 	set delimiterFrame ".delimiterFrame";
 	if {[winfo exists $delimiterFrame]} { destroy $delimiterFrame };
 	frame $delimiterFrame -borderwidth 10 -background orange;
 	
-	#pack the welcome frame
+	# pack the welcome frame
 	pack $::welcomeFrame -side top -expand true -fill both 
 	
-	#widgets in the window
-	#widget - specify delimiter
+	# widgets in the window
+	# widget - specify delimiter
 	label $delimiterFrame.lblDelimiter -text "Step 3 : Specify a delimiter" -background orange -compound left 
 	pack $delimiterFrame.lblDelimiter  -padx 20
 
-	#widget - delimiter entry field
+	# widget - delimiter entry field
 	entry $delimiterFrame.entryDelimiter -width 10 -bd 2 -textvariable delimiter
 	pack $delimiterFrame.entryDelimiter  -padx 20
 	
-	#widget - next step button
+	# widget - next step button
 	button $delimiterFrame.nextStep -text "Next Step ->" -background lightgrey -command {setMetricList}
 	pack $delimiterFrame.nextStep -padx 20 -pady 20
 	
-	#destroy previous frames and pack new frame
+	# destroy previous frames and pack new frame
 	if {[winfo exists .myArea]} { destroy .myArea };
 	if {[winfo exists .browseButtonFrame]} { destroy .browseButtonFrame };
 	if {[winfo exists .textAreaFrame]} { destroy .textAreaFrame };
@@ -500,13 +498,13 @@ proc getDelimiter {} {
 	pack $delimiterFrame -side top -expand true -fill both
 }
 
-#setting up window
+# setting up window
 wm geometry . "800x700+10+10"
-#wm attributes . -fullscreen 1
+# wm attributes . -fullscreen 1
 wm title . "Privacy Preserving Algorithm Analysis Tool"
 
-#setting up frame stuff
-#splitting widgets into several frames in order to display them well
+# setting up frame stuff
+# splitting widgets into several frames in order to display them well
 destroy .myArea .welcomeFrame .b .t .n .f
 set f [frame .myArea -borderwidth 10 -background orange]
 set welcomeFrame [frame .welcomeFrame -borderwidth 10 -background orange]
@@ -514,8 +512,8 @@ set b [frame .browseButtonFrame -borderwidth 10 -background orange]
 set t [frame .textAreaFrame -borderwidth 10 -background orange]
 set n [frame .nextButtonFrame -borderwidth 10 -background orange]
 
-#widgets in the window
-#widget - name of tool
+# widgets in the window
+# widget - name of tool
 label $welcomeFrame.border1 -text "----------------------------------------------" -background orange
 pack $welcomeFrame.border1 -padx 20 -pady 5
 label $welcomeFrame.lbl1 -text "Welcome to the Privacy Preserving Analysis tool" -background orange
@@ -523,44 +521,44 @@ label $welcomeFrame.border2 -text "---------------------------------------------
 pack $welcomeFrame.lbl1 -padx 20 -pady 5
 pack $welcomeFrame.border2 -padx 20 -pady 5
 
-#pack the welcome frame
+# pack the welcome frame
 pack $welcomeFrame -side top -expand true -fill both 
 
-#widget - upload first file label
+# widget - upload first file label
 label $f.lbl2 -text "Step 1 : Upload File before Sanitization" -background orange -compound left 
-#widget - upload sanitized file label
+# widget - upload sanitized file label
 label $f.lbl3 -text "Step 2 : Upload Sanitized File" -background orange -compound left 
 pack $f.lbl2 -padx 50 -side left
 pack $f.lbl3  -padx 100 -side left
 
-#widget - Browse button for first file
+# widget - Browse button for first file
 button $b.browse1 -text "Browse" -background lightgrey -command {openFile1}
-#widget - Browse button for second file
+# widget - Browse button for second file
 button $b.browse2 -text "Browse" -background lightgrey -command {openFile2}
 
 pack $b.browse1 -padx 120 -side left 
 pack $b.browse2 -padx 170 -side left 
 
-#widget - textArea
+# widget - textArea
 text $t.text1 -bd 2 -bg white -height 15 -width 40
 text $t.text2 -bd 2 -bg white -height 15 -width 40
 pack $t.text1 -padx 10 -pady 5 -side left
 pack $t.text2 -padx 10 -pady 5 -side left
 
-#widget - next step button
+# widget - next step button
 button $n.nextStep -text "Next Step ->" -background lightgrey -command {getDelimiter} -padx 15
 pack $n.nextStep -padx 20 -pady 20 
 
-#pack the entire frame containing labels
+# pack the entire frame containing labels
 pack $f -side top -expand true -fill both 
 
-#pack the entire frame containing browse buttons
+# pack the entire frame containing browse buttons
 pack $b -side top -expand true -fill both 
 
-#pack the entire frame containing textareas
+# pack the entire frame containing textareas
 pack $t -side top -expand true -fill both 
 
-#pack the entire frame containing button to go the next screen
+# pack the entire frame containing button to go the next screen
 pack $n -side top -expand true -fill both 
 
 # lines within first text area box
@@ -571,27 +569,27 @@ $t.text1 insert end "Or use the Browse button above...." tag1
 $t.text2 insert end "Please upload a csv file from the menu\n" tag0
 $t.text2 insert end "Or use the Browse button above.." tag1
 
-#creates a menubar
+# creates a menubar
 menu .menubar
 . config -menu .menubar
 
-#creates a pull down menu with a label 
+# creates a pull down menu with a label 
 set File [menu .menubar.mFile]
 .menubar add cascade -label File  -menu  .menubar.mFile
 
-#creates a new pull down for quit
+# creates a new pull down for quit
 set Quit [menu .menubar.quit]
 .menubar add cascade -label {Quit} -menu  .menubar.quit
 
-#options for the file drop down
+# options for the file drop down
 $File add command -label {Open File 1 (Sample input file)} -command openFile1
 $File add command -label {Open File 2 (Sample output file)} -command openFile2
 
-#options for the second drop down
+# options for the second drop down
 $Quit add command -label {Yes, I want to leave!} -command exit
 $Quit add command -label {No, I'll stay.}
 
-#start of barchart code
+# start of barchart code
 proc 3drect {w args} {
     if [string is int -strict [lindex $args 1]] {
         set coords [lrange $args 0 3]
@@ -645,7 +643,7 @@ proc bars {w data} {
 proc createBarChart {} {
 	global missesCost hidingFailure checkboxHidingFailure checkboxMissesCost
 		
-	#destroy previous frame and packs the new frame
+	# destroy previous frame and packs the new frame
 	if {[winfo exists .sensitivityLabelFrame]} { destroy .sensitivityLabelFrame };
 	pack [canvas .c -width 240 -height 280  -background orange -highlightthickness 0] -side left -expand true -fill both
 	if { $checkboxHidingFailure == 1 && $checkboxMissesCost == 1} {
@@ -670,4 +668,4 @@ proc createBarChart {} {
 	
 	.c create text 120 10 -anchor nw -text "Bar Chart"
 }
-#end of barchart code
+# end of barchart code
