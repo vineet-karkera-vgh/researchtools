@@ -139,9 +139,12 @@ proc getInformationLoss {} {
 };
 
 proc analyze {} {  
-	global col1 coln1 analyzeFrame welcomeFrame missesCost hidingFailure
+	global col1 coln1 analyzeFrame welcomeFrame missesCost hidingFailure cpuUtil
 	set analyzeFrame ".analyzeFrame";
 	set resultsFrame ".resultsFrame";
+	
+	#set the start of the stopwatch
+	set TIME_start [clock clicks -microseconds]
 	
 	# sets the values given by user into a global array mySensitiveArray
 	setPenaltyArray;
@@ -161,6 +164,14 @@ proc analyze {} {
 	# compares each element of the two lists passed
 	#checkEachElement $col1 $coln1;
 	
+	#call proc to calculate CPU time
+	set cpuUtil [expr [clock clicks -microseconds] - $TIME_start]
+	
+	#calculates time taken in the function on an average
+	#puts [time {setPenaltyArray} 100]
+	#puts [time {getMissesCost} 100]
+	#puts [time {getHidingFailure} 100]
+
 	if {[winfo exists $analyzeFrame]} { destroy $analyzeFrame };
 	frame $analyzeFrame -borderwidth 10 -background orange;
 	
@@ -180,7 +191,8 @@ proc analyze {} {
 	# widget - list of metrics
 	label $analyzeFrame.lbl7 -text "Hiding Failure - [format "%.2f" $hidingFailure] %" -background orange -compound left 
 	label $analyzeFrame.lbl8 -text "Misses Cost - [format "%.2f" $missesCost] %" -background orange -compound left  
-	pack $analyzeFrame.lbl7 $analyzeFrame.lbl8 -padx 20 -side left -expand true -fill both
+	label $analyzeFrame.lbl9 -text "Time Taken - [format "%.2f" $cpuUtil] microseconds" -background orange -compound left  
+	pack $analyzeFrame.lbl7 $analyzeFrame.lbl8 $analyzeFrame.lbl9 -padx 20 -side left -expand true -fill both
  
 	# destroy previous frames and packs the new frame
 	global sw
@@ -449,10 +461,10 @@ proc setMetricList {} {
 	# widget - checkbox list of metrics
 	checkbutton $metricFrame.checkboxHidingFailure -text {Hiding Failure} -anchor nw -background orange -compound left 
 	checkbutton $metricFrame.checkboxMissesCost -text {Misses Cost} -anchor nw -background orange -compound left 
-	checkbutton $metricFrame.checkboxLossMetric -text {Loss Metric} -anchor nw -background orange -state disabled -compound left 
-	checkbutton $metricFrame.checkboxClassificationMetric -text {Classification Metric} -anchor nw -background orange -state disabled -compound left 
-	checkbutton $metricFrame.checkboxDiscernibilityMetric -text {Discernibility Metric} -anchor nw -background orange -state disabled -compound left 
-	pack $metricFrame.checkboxHidingFailure $metricFrame.checkboxMissesCost $metricFrame.checkboxLossMetric $metricFrame.checkboxClassificationMetric $metricFrame.checkboxDiscernibilityMetric -padx 20 -side top -expand 1 -fill both
+	#checkbutton $metricFrame.checkboxLossMetric -text {Loss Metric} -anchor nw -background orange -state disabled -compound left 
+	#checkbutton $metricFrame.checkboxClassificationMetric -text {Classification Metric} -anchor nw -background orange -state disabled -compound left 
+	#checkbutton $metricFrame.checkboxDiscernibilityMetric -text {Discernibility Metric} -anchor nw -background orange -state disabled -compound left 
+	pack $metricFrame.checkboxHidingFailure $metricFrame.checkboxMissesCost -padx 20 -side top -expand 1 -fill both
 	
 	# widget - next step button
 	button $metricFrame.nextStep -text "Next Step ->" -background lightgrey -command {setQuasiIdentifiers}
@@ -499,7 +511,7 @@ proc getDelimiter {} {
 }
 
 # setting up window
-wm geometry . "800x700+10+10"
+wm geometry . "1100x700+10+10"
 # wm attributes . -fullscreen 1
 wm title . "Privacy Preserving Algorithm Analysis Tool"
 
