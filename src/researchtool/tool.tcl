@@ -197,8 +197,9 @@ proc analyze {} {
 	label $analyzeFrame.lbl8 -text "Misses Cost - [format "%.2f" $missesCost] %" -background orange -compound left  
 	label $analyzeFrame.lbl9 -text "Time Taken - [format "%.2f" $cpuUtil] microseconds" -background orange -compound left  
 	#label $analyzeFrame.lbl10 -text "CPU Utility - [format "%.2f" $cpuUtil] microseconds" -background orange -compound left  
-	pack $analyzeFrame.lbl7 $analyzeFrame.lbl8 $analyzeFrame.lbl9 -padx 20 -side left -expand true -fill both
- 
+	button $analyzeFrame.restartButton -text "<- Evaluate another File" -background yellow -command {restart_metric_calculation} -padx 15
+	pack $analyzeFrame.lbl7 $analyzeFrame.lbl8 $analyzeFrame.lbl9 $analyzeFrame.restartButton -padx 20 -side left -expand true -fill both
+	
 	# destroy previous frames and packs the new frame
 	global sw
 	if {[winfo exists $sw]} { destroy $sw};
@@ -207,10 +208,10 @@ proc analyze {} {
 	if {[winfo exists .buttonFrame]} { destroy .buttonFrame };
 	pack $resultsFrame -expand true -fill both -side top
 	pack $analyzeFrame -side left -expand true -fill both
-	
 	# call proc to draw bar chart with calculated values
 	createBarChart;
 };
+
 
 # proc to get the first line of the file
 proc getFirstLineFromFile {filename} {
@@ -541,6 +542,10 @@ proc setDelimiter {} {
 	set delimiter [$delimiterFrame.entryDelimiter get]
 }
 
+proc displayUnderConstruction {} {
+	tk_dialog .dialog1 "Under Construction" "This part of the tool is under construction" info 0 OK
+}
+
 proc displayHelpWindow {} {
 	tk_dialog .dialog1 "Help" "Follow the steps in the tool and click the 'Next' button at the bottom when done" info 0 OK
 }
@@ -552,19 +557,86 @@ This program is distributed in the hope that it will be useful, but comes with n
 Contributors : Vineet Karkera" info 0 OK
 }
 
+#procedure to initiate the calculation of metrices
+proc calculate_metrics {} {
+	global t	
+	#deleting all previous frames
+	destroy .myArea .welcomeFrame .b .t .n .f .bFrame .analyzeFrame .resultsFrame .sensitivityLabelFrame .c
+	# setting up frame stuff
+	# splitting widgets into several frames in order to display them well
+	set f [frame .myArea -borderwidth 10 -background orange]
+	set welcomeFrame [frame .welcomeFrame -borderwidth 10 -background orange]
+	set b [frame .browseButtonFrame -borderwidth 10 -background orange]
+	set t [frame .textAreaFrame -borderwidth 10 -background orange]
+	set n [frame .nextButtonFrame -borderwidth 10 -background orange]
+	# widgets in the window
+	# widget - name of tool
+	label $welcomeFrame.border1 -text "----------------------------------------------" -background orange
+	pack $welcomeFrame.border1 -padx 20 -pady 5
+	label $welcomeFrame.lbl1 -text "Welcome to the Privacy Preserving Analysis tool" -background orange
+	label $welcomeFrame.border2 -text "----------------------------------------------" -background orange
+	pack $welcomeFrame.lbl1 -padx 20 -pady 5
+	pack $welcomeFrame.border2 -padx 20 -pady 5
+
+	# pack the welcome frame
+	pack $welcomeFrame -side top -expand true -fill both 
+
+	# widget - upload first file label
+	label $f.lbl2 -text "Step 1 : Upload File before Sanitization" -background orange -compound left -padx 15
+	# widget - upload sanitized file label
+	label $f.lbl3 -text "Step 2 : Upload Sanitized File" -background orange -compound left -padx 15
+	pack $f.lbl2 -padx 50 -side left
+	pack $f.lbl3  -padx 100 -side left
+
+	# widget - Browse button for first file
+	button $b.browse1 -text "Browse" -background lightgrey -command {openFile1}
+	# widget - Browse button for second file
+	button $b.browse2 -text "Browse" -background lightgrey -command {openFile2}
+
+	pack $b.browse1 -padx 120 -side left 
+	pack $b.browse2 -padx 170 -side left 
+
+	# widget - textArea
+	text $t.text1 -bd 2 -bg white -height 15 -width 40
+	text $t.text2 -bd 2 -bg white -height 15 -width 40
+	pack $t.text1 -padx 10 -pady 5 -side left
+	pack $t.text2 -padx 10 -pady 5 -side left
+
+	# widget - next step button
+	button $n.nextStep -text "Next Step ->" -background lightgrey -command {getDelimiter} -padx 15
+	pack $n.nextStep -padx 20 -pady 20 
+
+	# pack the entire frame containing labels
+	pack $f -side top -expand true -fill both 
+
+	# pack the entire frame containing browse buttons
+	pack $b -side top -expand true -fill both 
+
+	# pack the entire frame containing textareas
+	pack $t -side top -expand true -fill both 
+
+	# pack the entire frame containing button to go the next screen
+	pack $n -side top -expand true -fill both 
+
+	# lines within first text area box
+	$t.text1 insert end "Please upload a csv file from the menu\n" tag0
+	$t.text1 insert end "Or use the Browse button above...." tag1
+
+	# lines within the second text area box
+	$t.text2 insert end "Please upload a csv file from the menu\n" tag0
+	$t.text2 insert end "Or use the Browse button above.." tag1
+}
+
 # setting up window
 wm geometry . "1100x700+10+10"
 # wm attributes . -fullscreen 1
-wm title . "Privacy Preserving Algorithm Analysis Tool"
+wm title . "Privacy Preserving Analysis Tool"
 
-# setting up frame stuff
 # splitting widgets into several frames in order to display them well
-destroy .myArea .welcomeFrame .b .t .n .f
-set f [frame .myArea -borderwidth 10 -background orange]
+destroy .welcomeFrame .bFrame
+set bFrame [frame .bFrame -borderwidth 10 -background orange]
 set welcomeFrame [frame .welcomeFrame -borderwidth 10 -background orange]
-set b [frame .browseButtonFrame -borderwidth 10 -background orange]
-set t [frame .textAreaFrame -borderwidth 10 -background orange]
-set n [frame .nextButtonFrame -borderwidth 10 -background orange]
+
 
 # widgets in the window
 # widget - name of tool
@@ -578,50 +650,20 @@ pack $welcomeFrame.border2 -padx 20 -pady 5
 # pack the welcome frame
 pack $welcomeFrame -side top -expand true -fill both 
 
-# widget - upload first file label
-label $f.lbl2 -text "Step 1 : Upload File before Sanitization" -background orange -compound left -padx 15
-# widget - upload sanitized file label
-label $f.lbl3 -text "Step 2 : Upload Sanitized File" -background orange -compound left -padx 15
-pack $f.lbl2 -padx 50 -side left
-pack $f.lbl3  -padx 100 -side left
-
+# widget - menu label
+label $bFrame.lbl2 -text "Please select from the following menu" -background orange -pady 10
 # widget - Browse button for first file
-button $b.browse1 -text "Browse" -background lightgrey -command {openFile1}
+button $bFrame.menu1 -text "Perform Risk Analysis on a file" -background lightgrey -command {displayUnderConstruction}
 # widget - Browse button for second file
-button $b.browse2 -text "Browse" -background lightgrey -command {openFile2}
+button $bFrame.menu2 -text "Anonymize Data" -background lightgrey -command {displayUnderConstruction}
+# widget - Browse button for second file
+button $bFrame.menu3 -text "Measure the level of Data Anonymization" -background lightgrey -command {calculate_metrics}
+# widget - Browse button for second file
+button $bFrame.menu4 -text "Exit" -background lightgrey -command {exit}
 
-pack $b.browse1 -padx 120 -side left 
-pack $b.browse2 -padx 170 -side left 
-
-# widget - textArea
-text $t.text1 -bd 2 -bg white -height 15 -width 40
-text $t.text2 -bd 2 -bg white -height 15 -width 40
-pack $t.text1 -padx 10 -pady 5 -side left
-pack $t.text2 -padx 10 -pady 5 -side left
-
-# widget - next step button
-button $n.nextStep -text "Next Step ->" -background lightgrey -command {getDelimiter} -padx 15
-pack $n.nextStep -padx 20 -pady 20 
-
-# pack the entire frame containing labels
-pack $f -side top -expand true -fill both 
-
-# pack the entire frame containing browse buttons
-pack $b -side top -expand true -fill both 
-
-# pack the entire frame containing textareas
-pack $t -side top -expand true -fill both 
-
-# pack the entire frame containing button to go the next screen
-pack $n -side top -expand true -fill both 
-
-# lines within first text area box
-$t.text1 insert end "Please upload a csv file from the menu\n" tag0
-$t.text1 insert end "Or use the Browse button above...." tag1
-
-# lines within the second text area box
-$t.text2 insert end "Please upload a csv file from the menu\n" tag0
-$t.text2 insert end "Or use the Browse button above.." tag1
+pack $bFrame.lbl2 $bFrame.menu1 $bFrame.menu2 $bFrame.menu3 $bFrame.menu4 -padx 100 -pady 10
+# pack the entire frame containing buttons
+pack $bFrame -side top -expand true -fill both 
 
 # creates a menubar
 menu .menubar
