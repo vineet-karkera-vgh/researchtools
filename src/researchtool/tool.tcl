@@ -34,6 +34,9 @@ proc setPenaltyArray {} {
 		set val [set checkbox$i]
 		dict lappend mySensitiveArray $i $val
 	}
+	
+	# call procedure to obtain the maximum penalty of the Quasi Identifiers
+	getMaxQIPenalty;
 }
 
 # procedure to create a list containing the Quasi Identifiers
@@ -47,14 +50,11 @@ proc setQIArray {} {
 		set val [set qiCheckbox$i]	
 		dict lappend myQIArray $i $val
 	}
-	
-	# call procedure to obtain the maximum penalty of the Quasi Identifiers
-	getMaxQIPenalty;
 }
 
 # procedure to obtain the maximum penalty value of the quasi identifiers
 proc getMaxQIPenalty {} {
-	global colNames myQIArray maxPenalty
+	global colNames myQIArray maxPenalty myScaleList
 
 	# loop to fetch the list of QI attributes
 	for {set i 0} {$i < [expr [llength $colNames]]} {incr i} {
@@ -139,27 +139,31 @@ proc getInformationLoss {} {
 };
 
 proc analyze {} {  
-	global col1 coln1 analyzeFrame welcomeFrame missesCost hidingFailure cpuUtil
+	global col1 coln1 analyzeFrame welcomeFrame missesCost hidingFailure cpuUtil checkboxHidingFailure checkboxMissesCost
 	set analyzeFrame ".analyzeFrame";
 	set resultsFrame ".resultsFrame";
 	
 	#set the start of the stopwatch
 	set TIME_start [clock clicks -microseconds]
 	
-	# sets the values given by user into a global array mySensitiveArray
-	setPenaltyArray;
-	
 	# sets the QI groups given by user into a global array myQIArray
 	setQIArray;
 	
-	# computes misses cost
-	getMissesCost;
+	# sets the values given by user into a global array mySensitiveArray
+	setPenaltyArray;
+	
+	# computes misses cost only if explicitly selected by user, or if no metric is selected by the user
+	if {($checkboxMissesCost == 1) || ($checkboxHidingFailure == 0 && $checkboxMissesCost == 0)} {
+		getMissesCost;
+	}
 	
 	# computes information loss
 	#getInformationLoss;
 	
-	# computes hiding Failure
-	getHidingFailure;
+	# computes hiding Failure only if explicitly selected by user, or if no metric is selected by the user
+	if {($checkboxHidingFailure == 1) || ($checkboxHidingFailure == 0 && $checkboxMissesCost == 0)} {
+		getHidingFailure;
+	}
 	
 	# compares each element of the two lists passed
 	#checkEachElement $col1 $coln1;
@@ -192,6 +196,7 @@ proc analyze {} {
 	label $analyzeFrame.lbl7 -text "Hiding Failure - [format "%.2f" $hidingFailure] %" -background orange -compound left 
 	label $analyzeFrame.lbl8 -text "Misses Cost - [format "%.2f" $missesCost] %" -background orange -compound left  
 	label $analyzeFrame.lbl9 -text "Time Taken - [format "%.2f" $cpuUtil] microseconds" -background orange -compound left  
+	#label $analyzeFrame.lbl10 -text "CPU Utility - [format "%.2f" $cpuUtil] microseconds" -background orange -compound left  
 	pack $analyzeFrame.lbl7 $analyzeFrame.lbl8 $analyzeFrame.lbl9 -padx 20 -side left -expand true -fill both
  
 	# destroy previous frames and packs the new frame
@@ -220,7 +225,7 @@ proc ladd L {expr [join $L +]+0}
 
 # proc to split the first file data into columns
 proc splitIntoColumns {filename} {
-	global numCols delimiter
+	global numCols delimiter delimiterFrame
 	set f [open $filename r]	
 	# the first line containing header names is skipped
 	set line [gets $f]
@@ -228,7 +233,7 @@ proc splitIntoColumns {filename} {
 	close $f
 	set data [split $file_data "\n"]
     foreach {line} $data {
-		set csvdata [split $line $delimiter]
+		set csvdata [split $line "$delimiter"]
 		set i 0
 		foreach {element} $csvdata {
 			global col$i
@@ -241,6 +246,7 @@ proc splitIntoColumns {filename} {
 # proc to split the second file data into columns
 proc splitIntoColns {filename} {
 	global numCols delimiter
+	
 	set f [open $filename r]	
 	# the first line containing header names is skipped
 	set line [gets $f]
@@ -248,7 +254,7 @@ proc splitIntoColns {filename} {
 	close $f
 	set data [split $file_data "\n"]
     foreach {line} $data {
-		set csvdata [split $line $delimiter]
+		set csvdata [split $line "$delimiter"]
 		set i 0
 		foreach {element} $csvdata {
 			global coln$i
@@ -337,8 +343,10 @@ proc setSensitivityLevel {} {
 	
 	# widgets in the window
 	# widget - upload file label
-	label $sensitivityLabelFrame.lblColumns -text "Step 6 : Choose a penalty for each of the columns. Zero penalty makes the attribute Non-Sensitive. HIgher the penalty, higher the Sensitivity" -background orange -compound left 
-	pack $sensitivityLabelFrame.lblColumns  -padx 20 -pady 40 -side top
+	label $sensitivityLabelFrame.lblColumns -text "Step 6 : Choose a penalty for each of the columns. Zero penalty makes the attribute Non-Sensitive. Higher the penalty, higher the Sensitivity" -background orange -compound left
+	label $sensitivityLabelFrame.lblNote -text "Note - Quasi-identifiers are highlighted in red, and are defaulted to a penalty value of 70. This can be changed using the scale below." -background orange -compound left 
+	label $sensitivityLabelFrame.lblBlank -text " " -background orange -compound left 
+	pack $sensitivityLabelFrame.lblColumns $sensitivityLabelFrame.lblNote $sensitivityLabelFrame.lblBlank -padx 20 -side top
 	
 	label $sensitivityLabelFrame.lblColumnName -text "Low ------------------------------- Penalty -------------------------------- High" -background orange -compound left  
 	pack $sensitivityLabelFrame.lblColumnName -padx 160 -side top -anchor nw
@@ -356,9 +364,17 @@ proc setSensitivityLevel {} {
 	set i 0
 	# Now fill the frame, resize the window to see the scrollbars in action 
     foreach x $colNames {
+		global qiCheckbox$i
+		set val [set qiCheckbox$i]	
+		
 		set checkbox$i 0
 		#set c [checkbutton $sensitivityLabelFrame.checkbox$i -text $x -anchor nw -background orange];
-		set c [scale $uf.scale$i -label $x -orient horizontal -from 0 -to 100 -length 400 -showvalue 0 -tickinterval 10 -variable checkbox$i -background orange  -sliderrelief raised -width 8]
+		if {$val == 0} {
+			set c [scale $uf.scale$i -label $x -activebackground black -orient horizontal -from 0 -to 100 -length 400 -tickinterval 10 -variable checkbox$i -background orange  -sliderrelief raised -width 8]
+		} else {
+ 			set c [scale $uf.scale$i -label $x -activebackground black -orient horizontal -from 0 -to 100 -length 400 -tickinterval 10 -variable checkbox$i -background red  -sliderrelief raised -width 8]
+			$uf.scale$i set 70
+		}
 		#pack $c -side top -anchor nw -expand false -padx 20 -pady 3;
 		#puts "value of i here is $i"
 		grid $c -row $i -column 1 -padx 160
@@ -389,9 +405,9 @@ proc setQuasiIdentifiers {} {
 	set qiFrame ".qiFrame";
 	
 	# the data of the first file is split into individual columns
-	splitIntoColumns $myFirstFile;
+	#splitIntoColumns $myFirstFile;
 	# the data of the second file is split into individual columns
-	splitIntoColns $mySecondFile;
+	#splitIntoColns $mySecondFile;
 	
 	if {[winfo exists $qiLabelFrame]} { destroy $qiLabelFrame };
 	frame $qiLabelFrame -borderwidth 0 -background orange;
@@ -404,8 +420,11 @@ proc setQuasiIdentifiers {} {
 	
 	# widgets in the window
 	# widget - upload file label
-	label $qiLabelFrame.lblColumns -text "Step 5 : Group the Quasi-Identifier Columns" -background orange -compound left 
-	pack $qiLabelFrame.lblColumns  -padx 20 -pady 40 -side top
+	label $qiLabelFrame.lblColumns -text "Step 5 : Group the Quasi-Identifier Columns" -background orange -compound left
+	label $qiLabelFrame.lblBlank1 -text " " -background orange -compound left
+	label $qiLabelFrame.lblNote -text "Note - Select at least 2  Quasi Identifiers from the list below" -background orange -compound left
+	label $qiLabelFrame.lblBlank2 -text " " -background orange -compound left	
+	pack $qiLabelFrame.lblColumns $qiLabelFrame.lblBlank1 $qiLabelFrame.lblNote $qiLabelFrame.lblBlank2 -padx 20 -side top
 	
 	global swo
 	# Make a frame scrollable
@@ -445,18 +464,23 @@ proc setQuasiIdentifiers {} {
 
 # select the metrics
 proc setMetricList {} {
-	global delimiterFrame metricList welcomeFrame metricFrame checkboxHidingFailure checkboxMissesCost checkboxLossMetric checkboxClassificationMetric checkboxDiscernibilityMetric
+	global delimiterFrame metricList welcomeFrame metricFrame checkboxHidingFailure checkboxMissesCost checkboxLossMetric checkboxClassificationMetric checkboxDiscernibilityMetric delimiter
 	
 	set metricFrame ".metricFrame";
 	if {[winfo exists $metricFrame]} { destroy $metricFrame };
 	frame $metricFrame -borderwidth 10 -background orange;
+	
+	#sets the delimiter value
+	setDelimiter;
 	
 	# pack the welcome frame
 	pack $welcomeFrame -side top -expand true -fill both 
 	
 	# widgets in the window
 	label $metricFrame.lblDelimiter -text "Step 4 : Select the metrics to be calculated" -background orange -compound left 
-	pack $metricFrame.lblDelimiter  -padx 20
+	label $metricFrame.lblNote -text "Note - If no metric is selected, both Hiding Failure and Misses Cost will be calculated" -background orange -compound left 
+	label $metricFrame.lblBlank -text " " -background orange -compound left 
+	pack $metricFrame.lblDelimiter $metricFrame.lblNote $metricFrame.lblBlank -padx 20
 
 	# widget - checkbox list of metrics
 	checkbutton $metricFrame.checkboxHidingFailure -text {Hiding Failure} -anchor nw -background orange -compound left 
@@ -477,7 +501,7 @@ proc setMetricList {} {
 
 # selecting the delimiter
 proc getDelimiter {} {
-	global delimiterFrame welcomeFrame
+	global delimiterFrame welcomeFrame delimiter
 	
 	# contains the delimiter, default set to comma
 	set delimiter ","
@@ -492,7 +516,9 @@ proc getDelimiter {} {
 	# widgets in the window
 	# widget - specify delimiter
 	label $delimiterFrame.lblDelimiter -text "Step 3 : Specify a delimiter" -background orange -compound left 
-	pack $delimiterFrame.lblDelimiter  -padx 20
+	label $delimiterFrame.lblNote -text "Note - If nothing is specified below, the default delimiter is set to 'comma'" -background orange -compound left 
+	label $delimiterFrame.lblBlank -text " " -background orange -compound left 
+	pack $delimiterFrame.lblDelimiter $delimiterFrame.lblNote $delimiterFrame.lblBlank -padx 20
 
 	# widget - delimiter entry field
 	entry $delimiterFrame.entryDelimiter -width 10 -bd 2 -textvariable delimiter
@@ -508,6 +534,22 @@ proc getDelimiter {} {
 	if {[winfo exists .textAreaFrame]} { destroy .textAreaFrame };
 	if {[winfo exists .nextButtonFrame]} { destroy .nextButtonFrame };
 	pack $delimiterFrame -side top -expand true -fill both
+}
+
+proc setDelimiter {} {
+	global delimiter delimiterFrame
+	set delimiter [$delimiterFrame.entryDelimiter get]
+}
+
+proc displayHelpWindow {} {
+	tk_dialog .dialog1 "Help" "Follow the steps in the tool and click the 'Next' button at the bottom when done" info 0 OK
+}
+
+proc displayAboutWindow {} {
+	tk_dialog .dialog1 "About" "This program is a free software, created as part of a Masters program at Memorial University of Newfoundland in the year 2014.\n
+This program is distributed in the hope that it will be useful, but comes with no warranty.\n
+\n
+Contributors : Vineet Karkera" info 0 OK
 }
 
 # setting up window
@@ -537,9 +579,9 @@ pack $welcomeFrame.border2 -padx 20 -pady 5
 pack $welcomeFrame -side top -expand true -fill both 
 
 # widget - upload first file label
-label $f.lbl2 -text "Step 1 : Upload File before Sanitization" -background orange -compound left 
+label $f.lbl2 -text "Step 1 : Upload File before Sanitization" -background orange -compound left -padx 15
 # widget - upload sanitized file label
-label $f.lbl3 -text "Step 2 : Upload Sanitized File" -background orange -compound left 
+label $f.lbl3 -text "Step 2 : Upload Sanitized File" -background orange -compound left -padx 15
 pack $f.lbl2 -padx 50 -side left
 pack $f.lbl3  -padx 100 -side left
 
@@ -590,12 +632,21 @@ set File [menu .menubar.mFile]
 .menubar add cascade -label File  -menu  .menubar.mFile
 
 # creates a new pull down for quit
+set Help [menu .menubar.help]
+.menubar add cascade -label {Help} -menu  .menubar.help
+
+# creates a new pull down for quit
 set Quit [menu .menubar.quit]
 .menubar add cascade -label {Quit} -menu  .menubar.quit
 
 # options for the file drop down
-$File add command -label {Open File 1 (Sample input file)} -command openFile1
-$File add command -label {Open File 2 (Sample output file)} -command openFile2
+$File add command -label {About} -command {displayAboutWindow}
+$File add command -label {Help} -command {displayHelpWindow}
+$File add command -label {Exit} -command exit
+
+# options for the file drop down
+$Help add command -label {Help} -command {displayHelpWindow}
+$Help add command -label {About} -command {displayAboutWindow}
 
 # options for the second drop down
 $Quit add command -label {Yes, I want to leave!} -command exit
