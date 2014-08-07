@@ -186,21 +186,19 @@ proc analyze {} {
 	frame $resultsFrame -borderwidth 10 -background orange;
 	
 	# widgets in the window
-	label $resultsFrame.lbl10 -text "Analysis and Results" -background orange -compound left -font {Helvetica 14} 
-	label $resultsFrame.lbl11 -text "Hiding Failure (HF) is the percentage of sensitive information that can still be effectively discovered after sanitizing the data" -background orange -compound left -font {Times 10}
-	label $resultsFrame.lbl12 -text "Misses cost (MC) measures the percentage of non-sensitive information that is hidden after the sanitization process." -background orange -compound left -font {Times 10}
-	label $resultsFrame.lbl13 -text "PRIVACY (hiding failure) and UTILITY (misses cost) of the sanitized file is calculated." -background orange -compound left -font {Times 10}
-	pack $resultsFrame.lbl10 $resultsFrame.lbl13 $resultsFrame.lbl11 $resultsFrame.lbl12  -expand true -fill both -padx 10 -pady 10 -side top
+	label $resultsFrame.lbl10 -text "Analysis and Results" -background orange -compound left -foreground white -font {helvetica 14 bold} 
+	pack $resultsFrame.lbl10 -expand true -fill both -padx 10 -pady 10
 
 	# widget - list of metrics
-	label $analyzeFrame.lbl7 -text "Hiding Failure - [format "%.2f" $hidingFailure] %" -background orange -compound left 
-	label $analyzeFrame.lbl8 -text "Misses Cost - [format "%.2f" $missesCost] %" -background orange -compound left  
-	label $analyzeFrame.lbl9 -text "Time Taken - [format "%.2f" $cpuUtil] milliseconds" -background orange -compound left  
+	label $analyzeFrame.lbl7 -text "Hiding Failure - [format "%.2f" $hidingFailure] %" -background orange -compound left -foreground white -font {helvetica 14}
+	label $analyzeFrame.lbl8 -text "Misses Cost - [format "%.2f" $missesCost] %" -background orange -compound left -foreground white -font {helvetica 14}
+	label $analyzeFrame.lbl9 -text "Time Taken - [format "%.2f" $cpuUtil] milliseconds" -background orange -compound left  -foreground white -font {helvetica 14}
 	#label $analyzeFrame.lbl10 -text "CPU Utility - [format "%.2f" $cpuUtil] microseconds" -background orange -compound left  
-	button $analyzeFrame.restartButton -text "Click here to Evaluate another File" -background lightgreen -command {restart_metric_calculation} -padx 15 
-	
-	
-	pack $analyzeFrame.lbl7 $analyzeFrame.lbl8 $analyzeFrame.lbl9 $analyzeFrame.restartButton -padx 20 -side left -expand true -fill both
+	button $analyzeFrame.restartButton -text "Evaluate another File" -background #79cbc8 -command {restart_metric_calculation} -padx 15 -foreground white -font {helvetica 10 bold} -width 10
+	pack $analyzeFrame.lbl7 -padx 20 -side top -expand true -fill both
+	pack $analyzeFrame.lbl8 -padx 20 -expand true -fill both
+	pack $analyzeFrame.lbl9 -padx 20 -expand true -fill both
+	pack $analyzeFrame.restartButton -padx 20 -expand true -fill both -side bottom
 	
 	# destroy previous frames and packs the new frame
 	global sw
@@ -369,8 +367,8 @@ proc setSensitivityLevel {} {
 	
 	# widgets in the window
 	# widget - upload file label
-	label $sensitivityLabelFrame.lblColumns -text "Step 6 : Choose a penalty for each of the columns. Zero penalty makes the attribute Non-Sensitive. Higher the penalty, higher the Sensitivity" -background orange -compound left
-	label $sensitivityLabelFrame.lblNote -text "Note - Quasi-identifiers are highlighted in red, and are defaulted to a penalty value of 70. This can be changed using the scale below." -background orange -compound left 
+	label $sensitivityLabelFrame.lblColumns -text "Step 6 : Choose a penalty for each of the columns. Zero penalty makes the attribute Non-Sensitive. Higher the penalty, higher the Sensitivity" -background orange -compound left -foreground white -font {helvetica 11 bold}
+	label $sensitivityLabelFrame.lblNote -text "(Note - Quasi-identifiers are highlighted in red, and are defaulted to a penalty value of 70. This can be changed using the scale below.)" -background orange -compound left -foreground white -font {helvetica 11}
 	label $sensitivityLabelFrame.lblBlank -text " " -background orange -compound left 
 	pack $sensitivityLabelFrame.lblColumns $sensitivityLabelFrame.lblNote $sensitivityLabelFrame.lblBlank -padx 20 -side top
 	
@@ -411,7 +409,7 @@ proc setSensitivityLevel {} {
 	frame .buttonFrame -borderwidth 0 -background orange;
 	
 	# widget - next step button
-	button .buttonFrame.nextStep -text "Final Step - Analyze" -background #79cbc8 -command {analyze}
+	button .buttonFrame.nextStep -text "Final Step - Analyze" -background #79cbc8 -command {analyze} -foreground white -font {helvetica 10 bold}
 	pack .buttonFrame.nextStep -padx 20 -pady 20
 	
 	# destroy previous frame and pack new frame
@@ -446,9 +444,9 @@ proc setQuasiIdentifiers {} {
 	
 	# widgets in the window
 	# widget - upload file label
-	label $qiLabelFrame.lblColumns -text "Step 5 : Group the Quasi-Identifier Columns" -background orange -compound left
+	label $qiLabelFrame.lblColumns -text "Step 5 : Group the Quasi-Identifier Columns" -background orange -compound left -foreground white -font {helvetica 11 bold}
 	label $qiLabelFrame.lblBlank1 -text " " -background orange -compound left
-	label $qiLabelFrame.lblNote -text "Note - Select at least 2  Quasi Identifiers from the list below" -background orange -compound left
+	label $qiLabelFrame.lblNote -text "(Note - Select at least 2  Quasi Identifiers from the list below)" -background orange -compound left -foreground white -font {helvetica 11}
 	label $qiLabelFrame.lblBlank2 -text " " -background orange -compound left	
 	pack $qiLabelFrame.lblColumns $qiLabelFrame.lblBlank1 $qiLabelFrame.lblNote $qiLabelFrame.lblBlank2 -padx 20 -side top
 	
@@ -478,7 +476,7 @@ proc setQuasiIdentifiers {} {
 	frame .buttonFrame -borderwidth 0 -background orange;
 	
 	# widget - next step button
-	button .buttonFrame.nextStep -text "Next Step ->" -background #79cbc8 -command {setSensitivityLevel}
+	button .buttonFrame.nextStep -text "Next Step ->" -background #79cbc8 -command {setSensitivityLevel} -foreground white -font {helvetica 10 bold}
 	pack .buttonFrame.nextStep -padx 20 -pady 20
 	
 	# destroy previous frame and pack new frame
@@ -503,21 +501,21 @@ proc setMetricList {} {
 	pack $welcomeFrame -side top -expand true -fill both 
 	
 	# widgets in the window
-	label $metricFrame.lblDelimiter -text "Step 4 : Select the metrics to be calculated" -background orange -compound left 
-	label $metricFrame.lblNote -text "Note - If no metric is selected, both Hiding Failure and Misses Cost will be calculated" -background orange -compound left 
+	label $metricFrame.lblDelimiter -text "Step 4 : Select the metrics to be calculated" -background orange -compound left -foreground white -font {helvetica 11 bold}
+	label $metricFrame.lblNote -text "(Note - If no metric is selected, both Hiding Failure and Misses Cost will be calculated)" -background orange -compound left -foreground white -font {helvetica 11}
 	label $metricFrame.lblBlank -text " " -background orange -compound left 
 	pack $metricFrame.lblDelimiter $metricFrame.lblNote $metricFrame.lblBlank -padx 20
 
 	# widget - checkbox list of metrics
-	checkbutton $metricFrame.checkboxHidingFailure -text {Hiding Failure [calculates the percentage of sensitive information that can still be effectively discovered after sanitizing the data]} -anchor nw -background orange -compound left 
-	checkbutton $metricFrame.checkboxMissesCost -text {Misses Cost [measures the percentage of non-sensitive information that is hidden after the sanitization process]} -anchor nw -background orange -compound left 
+	checkbutton $metricFrame.checkboxHidingFailure -text {Hiding Failure [calculates the percentage of sensitive information that can still be effectively discovered after sanitizing the data]} -anchor nw -background orange -compound left
+	checkbutton $metricFrame.checkboxMissesCost -text {Misses Cost [measures the percentage of non-sensitive information that is hidden after the sanitization process]} -anchor nw -background orange -compound left
 	#checkbutton $metricFrame.checkboxLossMetric -text {Loss Metric} -anchor nw -background orange -state disabled -compound left 
 	#checkbutton $metricFrame.checkboxClassificationMetric -text {Classification Metric} -anchor nw -background orange -state disabled -compound left 
 	#checkbutton $metricFrame.checkboxDiscernibilityMetric -text {Discernibility Metric} -anchor nw -background orange -state disabled -compound left 
 	pack $metricFrame.checkboxHidingFailure $metricFrame.checkboxMissesCost -padx 20 -side top -expand 1 -fill both
 	
 	# widget - next step button
-	button $metricFrame.nextStep -text "Next Step ->" -background #79cbc8 -command {setQuasiIdentifiers}
+	button $metricFrame.nextStep -text "Next Step >>" -background #79cbc8 -command {setQuasiIdentifiers} -foreground white -font {helvetica 10 bold} -width 10
 	pack $metricFrame.nextStep -padx 20 -pady 20 
 	
 	# destroy previous frames and pack new frame
@@ -541,8 +539,8 @@ proc getDelimiter {} {
 	
 	# widgets in the window
 	# widget - specify delimiter
-	label $delimiterFrame.lblDelimiter -text "Step 3 : Specify a delimiter" -background orange -compound left 
-	label $delimiterFrame.lblNote -text "Note - If nothing is specified below, the default delimiter is set to 'comma'" -background orange -compound left 
+	label $delimiterFrame.lblDelimiter -text "Step 3 : Specify a delimiter" -background orange -compound left -foreground white -font {helvetica 11 bold}
+	label $delimiterFrame.lblNote -text "(Note - If nothing is specified below, the default delimiter is set to 'comma')" -background orange -compound left -foreground white -font {helvetica 11}
 	label $delimiterFrame.lblBlank -text " " -background orange -compound left 
 	pack $delimiterFrame.lblDelimiter $delimiterFrame.lblNote $delimiterFrame.lblBlank -padx 20
 
@@ -551,7 +549,7 @@ proc getDelimiter {} {
 	pack $delimiterFrame.entryDelimiter  -padx 20
 	
 	# widget - next step button
-	button $delimiterFrame.nextStep -text "Next Step ->" -background #79cbc8 -command {setMetricList}
+	button $delimiterFrame.nextStep -text "Next Step >>" -background #79cbc8 -command {setMetricList} -foreground white -font {helvetica 10 bold} -width 10
 	pack $delimiterFrame.nextStep -padx 20 -pady 20
 	
 	# destroy previous frames and pack new frame
@@ -596,28 +594,32 @@ proc calculate_metrics {} {
 	set n [frame .nextButtonFrame -borderwidth 10 -background orange]
 	# widgets in the window
 	# widget - name of tool
-	label $welcomeFrame.border1 -text "----------------------------------------------" -background orange
-	pack $welcomeFrame.border1 -padx 20 -pady 5 -foreground white -font {helvetica 12 bold}
-	label $welcomeFrame.lbl1 -text "Welcome to the Privacy Preserving Analysis tool" -background orange  -foreground white -font {helvetica 16 bold}
+	label $welcomeFrame.border1 -text "----------------------------------------------" -background orange -foreground white -font {helvetica 12 bold}
+	pack $welcomeFrame.border1 -padx 20 -pady 5 
+	label $welcomeFrame.lbl1 -text "Welcome to the Privacy Preserving Analysis tool" -background orange  -foreground white -font {helvetica 16 bold} -compound left
 	label $welcomeFrame.border2 -text "----------------------------------------------" -background orange -foreground white -font {helvetica 12 bold}
-	pack $welcomeFrame.lbl1 -padx 20 -pady 5
-	pack $welcomeFrame.border2 -padx 20 -pady 5
+	set welcomeImg [image create photo -file PPAT_logo.gif]
+	label $welcomeFrame.l -image $welcomeImg -height 30 -width 60 -compound left
+	pack $welcomeFrame.l -padx 20 -pady 5 -side left
+	pack $welcomeFrame.lbl1 -padx 20 -pady 5 -side left
+	pack $welcomeFrame.border2 -padx 20 -pady 5 -side bottom
+	
 
 
 	# pack the welcome frame
 	pack $welcomeFrame -side top -expand true -fill both 
 
 	# widget - upload first file label
-	label $f.lbl2 -text "Step 1 : Upload File before Sanitization" -background orange -compound left -padx 15
+	label $f.lbl2 -text "Step 1 : Upload File before Sanitization" -background orange -compound left -padx 15 -foreground white -font {helvetica 11 bold}
 	# widget - upload sanitized file label
-	label $f.lbl3 -text "Step 2 : Upload Sanitized File" -background orange -compound left -padx 15
+	label $f.lbl3 -text "Step 2 : Upload Sanitized File" -background orange -compound left -padx 15 -foreground white -font {helvetica 11 bold}
 	pack $f.lbl2 -padx 50 -side left
 	pack $f.lbl3  -padx 100 -side left
 
 	# widget - Browse button for first file
-	button $b.browse1 -text "Browse" -background #79cbc8 -command {openFile1} -foreground white -font {helvetica 12 bold}
+	button $b.browse1 -text "Browse" -background #79cbc8 -command {openFile1} -foreground white -font {helvetica 10 bold} -width 10
 	# widget - Browse button for second file
-	button $b.browse2 -text "Browse" -background #79cbc8 -command {openFile2} -foreground white -font {helvetica 12 bold}
+	button $b.browse2 -text "Browse" -background #79cbc8 -command {openFile2} -foreground white -font {helvetica 10 bold} -width 10
 
 	pack $b.browse1 -padx 120 -side left 
 	pack $b.browse2 -padx 170 -side left 
@@ -629,7 +631,7 @@ proc calculate_metrics {} {
 	pack $t.text2 -padx 10 -pady 5 -side left
 
 	# widget - next step button
-	button $n.nextStep -text "Next Step ->" -background #79cbc8 -command {getDelimiter} -padx 15
+	button $n.nextStep -text "Next Step >>" -background #79cbc8 -command {getDelimiter} -padx 15 -foreground white -font {helvetica 10 bold} -width 10
 	pack $n.nextStep -padx 20 -pady 20 
 
 	# pack the entire frame containing labels
@@ -679,13 +681,13 @@ pack $welcomeFrame -side top -expand true -fill both
 # widget - menu label
 label $bFrame.lbl2 -text "Please select from the following menu" -background orange -pady 10 -foreground white -font {helvetica 12 bold}
 # widget - Browse button for first file
-button $bFrame.menu1 -text "Perform Risk Analysis on a file" -background #79cbc8 -command {displayUnderConstruction} -width 33 -foreground white -font {helvetica 10 bold}
+button $bFrame.menu1 -text "Perform Risk Analysis on a file" -background #79cbc8 -command {displayUnderConstruction} -width 34 -foreground white -font {helvetica 10 bold}
 # widget - Browse button for second file
-button $bFrame.menu2 -text "Anonymize Data" -background #79cbc8 -command {displayUnderConstruction} -width 33 -foreground white -font {helvetica 10 bold}
+button $bFrame.menu2 -text "Anonymize Data" -background #79cbc8 -command {displayUnderConstruction} -width 34 -foreground white -font {helvetica 10 bold}
 # widget - Browse button for second file
-button $bFrame.menu3 -text "Measure the level of Data Anonymization" -background #79cbc8 -command {calculate_metrics} -width 33 -foreground white -font {helvetica 10 bold}
+button $bFrame.menu3 -text "Measure the level of Data Anonymization" -background #79cbc8 -command {calculate_metrics} -width 34 -foreground white -font {helvetica 10 bold}
 # widget - Browse button for second file
-button $bFrame.menu4 -text "Exit" -background #79cbc8 -command {exit} -width 33 -foreground white -font {helvetica 10 bold}
+button $bFrame.menu4 -text "Exit" -background #79cbc8 -command {exit} -width 34 -foreground white -font {helvetica 10 bold}
 
 pack $bFrame.lbl2 $bFrame.menu1 $bFrame.menu2 $bFrame.menu3 $bFrame.menu4 -padx 100 -pady 10
 # pack the entire frame containing buttons
