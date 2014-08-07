@@ -307,16 +307,27 @@ proc openFile1 {} {
 	
 	# number of columns in the file
 	set numCols [llength  $colNames ]
-	#puts "Number of columns in $colNames is $numCols" 
+	
+	#calculate number of bytes
+	set bytes [file size $myFirstFile]
+	
+	set file_data [read $fileID]
+	
+	#calculates the number of lines in the file
+	set numLines [expr [llength [split $file_data "\n"]] -1]
+	
+	#calculates the number of elements in the file
+	set numElements [expr $numLines * $numCols]
 	
 	# populates the textarea with new information
-	set i 1
+	#set i 1
 	$t.text1 delete 1.0 end
-	while { [gets $fileID line] >= 0 } {
+	$t.text1 insert end "File Loaded Successfully!!\nNumber of Attributes = $numCols\nNumber of Records = $numLines\nNumber of bytes = $bytes bytes\nNumber of elements = $numElements"
+	#while { [gets $fileID line] >= 0 } {
 		#puts stdout [format "line(%d)=%s" $i $line]
-		$t.text1 insert end [format "%s\n" $line]
-		incr i
-		} ;
+	#	$t.text1 insert end [format "%s\n" $line]
+	#	incr i
+	#	} ;
 
 	close $fileID
 } ; 
@@ -332,15 +343,31 @@ proc openFile2 {} {
 
 	set fileID [open $mySecondFile r]
 	
-	# populates the textarea with new information
-	set i 1
-	$t.text2 delete 1.0 end
-	while { [gets $fileID line] >= 0 } {
-		#puts stdout [format "line(%d)=%s" $i $line]
-		$t.text2 insert end [format "%s\n" $line]
-		incr i
-		} ;
+	# fetch first line from the file - header names
+	set firstLine [getFirstLineFromFile $mySecondFile]
 
+	# split first line into column names
+	set colNames [split $firstLine ,]
+	
+	# number of columns in the file
+	set numCols [llength  $colNames ]
+	
+	#calculate number of bytes
+	set bytes [file size $mySecondFile]
+	
+	set file_data [read $fileID]
+	
+	#calculates the number of lines in the file
+	set numLines [expr [llength [split $file_data "\n"]] -1]
+	
+	#calculates the number of elements in the file
+	set numElements [expr $numLines * $numCols]
+	
+	# populates the textarea with new information
+	#set i 1
+	$t.text2 delete 1.0 end
+	$t.text2 insert end "File Loaded Successfully!!\nNumber of Attributes = $numCols\nNumber of Records = $numLines\nNumber of bytes = $bytes bytes\nNumber of elements = $numElements"
+	
 	close $fileID
 };
 
@@ -476,7 +503,7 @@ proc setQuasiIdentifiers {} {
 	frame .buttonFrame -borderwidth 0 -background orange;
 	
 	# widget - next step button
-	button .buttonFrame.nextStep -text "Next Step ->" -background #79cbc8 -command {setSensitivityLevel} -foreground white -font {helvetica 10 bold}
+	button .buttonFrame.nextStep -text "Next Step >>" -background #79cbc8 -command {setSensitivityLevel} -foreground white -font {helvetica 10 bold}
 	pack .buttonFrame.nextStep -padx 20 -pady 20
 	
 	# destroy previous frame and pack new frame
@@ -592,19 +619,15 @@ proc calculate_metrics {} {
 	set b [frame .browseButtonFrame -borderwidth 10 -background orange]
 	set t [frame .textAreaFrame -borderwidth 10 -background orange]
 	set n [frame .nextButtonFrame -borderwidth 10 -background orange]
+	
 	# widgets in the window
 	# widget - name of tool
 	label $welcomeFrame.border1 -text "----------------------------------------------" -background orange -foreground white -font {helvetica 12 bold}
-	pack $welcomeFrame.border1 -padx 20 -pady 5 
-	label $welcomeFrame.lbl1 -text "Welcome to the Privacy Preserving Analysis tool" -background orange  -foreground white -font {helvetica 16 bold} -compound left
+	pack $welcomeFrame.border1 -padx 20 -pady 5
+	label $welcomeFrame.lbl1 -text "Welcome to the Privacy Preserving Analysis tool" -background orange -foreground white -font {helvetica 16 bold}
 	label $welcomeFrame.border2 -text "----------------------------------------------" -background orange -foreground white -font {helvetica 12 bold}
-	set welcomeImg [image create photo -file PPAT_logo.gif]
-	label $welcomeFrame.l -image $welcomeImg -height 30 -width 60 -compound left
-	pack $welcomeFrame.l -padx 20 -pady 5 -side left
-	pack $welcomeFrame.lbl1 -padx 20 -pady 5 -side left
-	pack $welcomeFrame.border2 -padx 20 -pady 5 -side bottom
-	
-
+	pack $welcomeFrame.lbl1 -padx 20 -pady 5
+	pack $welcomeFrame.border2 -padx 20 -pady 5
 
 	# pack the welcome frame
 	pack $welcomeFrame -side top -expand true -fill both 
@@ -613,7 +636,7 @@ proc calculate_metrics {} {
 	label $f.lbl2 -text "Step 1 : Upload File before Sanitization" -background orange -compound left -padx 15 -foreground white -font {helvetica 11 bold}
 	# widget - upload sanitized file label
 	label $f.lbl3 -text "Step 2 : Upload Sanitized File" -background orange -compound left -padx 15 -foreground white -font {helvetica 11 bold}
-	pack $f.lbl2 -padx 50 -side left
+	pack $f.lbl2 -padx 60 -side left
 	pack $f.lbl3  -padx 100 -side left
 
 	# widget - Browse button for first file
@@ -621,18 +644,18 @@ proc calculate_metrics {} {
 	# widget - Browse button for second file
 	button $b.browse2 -text "Browse" -background #79cbc8 -command {openFile2} -foreground white -font {helvetica 10 bold} -width 10
 
-	pack $b.browse1 -padx 120 -side left 
-	pack $b.browse2 -padx 170 -side left 
+	pack $b.browse1 -padx 180 -side left 
+	pack $b.browse2 -padx 150 -side left 
 
 	# widget - textArea
 	text $t.text1 -bd 2 -bg white -height 15 -width 40
 	text $t.text2 -bd 2 -bg white -height 15 -width 40
-	pack $t.text1 -padx 10 -pady 5 -side left
-	pack $t.text2 -padx 10 -pady 5 -side left
-
+	pack $t.text1 -padx 50 -pady 5 -side left
+	pack $t.text2 -padx 100 -pady 5 -side left
+	
 	# widget - next step button
 	button $n.nextStep -text "Next Step >>" -background #79cbc8 -command {getDelimiter} -padx 15 -foreground white -font {helvetica 10 bold} -width 10
-	pack $n.nextStep -padx 20 -pady 20 
+	pack $n.nextStep -pady 20
 
 	# pack the entire frame containing labels
 	pack $f -side top -expand true -fill both 
