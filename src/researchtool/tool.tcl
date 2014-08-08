@@ -143,6 +143,9 @@ proc analyze {} {
 	set analyzeFrame ".analyzeFrame";
 	set resultsFrame ".resultsFrame";
 	
+	
+	getFrequencyCount;
+	
 	#set the start of the stopwatch
 	set TIME_start [clock clicks -milliseconds]
 	
@@ -246,6 +249,36 @@ proc getFirstLineFromFile {filename} {
 
 # proc to get arithmetic sum of elements in a list
 proc ladd L {expr [join $L +]+0}
+
+#proc to get the frequency of elements in a list
+proc lcount list {
+    foreach x $list {lappend arr($x) {}}
+    set res {}
+    foreach name [array names arr] {
+       lappend res [list $name [llength $arr($name)]]
+    }
+    return $res
+}
+
+#proc to iterate through every QI/Sensitive Column and get a frequency count of each element for the classification metric
+proc getFrequencyCount {} {
+	global colNames
+	for {set i 0} {$i < [expr [llength $colNames]]} {incr i} {
+		global col$i coln$i freq_col$i freq_coln$i qiCheckbox$i checkbox$i
+		set qicheckbox [set qiCheckbox$i]
+		set checkbox [set checkbox$i]
+		if {$qicheckbox == 1 || $checkbox > 0} {
+			set column_original [set col$i]
+			set column_sanitized [set coln$i]
+			#sorts the result in descending order, the most frequent element at the top of the list
+			set result1 [lsort -integer -index 1 -decr [lcount $column_original]]
+			set result2 [lsort -integer -index 1 -decr [lcount $column_sanitized]]
+			#stores the most frequent element of the column in the a global variable
+			set freq_col$i [lindex $result1 0 0]
+			set freq_coln$i [lindex $result2 0 0]
+		}
+	} 
+}
 
 # proc to split the first file data into columns
 proc splitIntoColumns {filename} {
@@ -494,11 +527,10 @@ proc setQuasiIdentifiers {} {
 		set c [checkbutton $ufo.qiCheckbox$i -text $x -anchor nw -background orange -compound left];
 		#set c [scale $ufo.scale$i -label $x -orient horizontal -from 0 -to 100 -length 400 -showvalue 0 -tickinterval 10 -variable checkbox$i -background orange  -sliderrelief raised -width 8]
 		#pack $c -side top -anchor nw -expand false -padx 20 -pady 3;
-		#puts "value of i here is $i"
 		grid $c -row $i -column 0 -padx 280 -pady 10
 		incr i
 	}
-	
+		
 	if {[winfo exists .buttonFrame]} { destroy .buttonFrame };
 	frame .buttonFrame -borderwidth 0 -background orange;
 	
@@ -823,5 +855,10 @@ proc createBarChart {} {
     }
 	
 	.c create text 120 10 -anchor nw -text "Bar Chart"
+	
+	# graphics code 
+	#.c postscript -file foo.ps 
+	#exec lpr -Dpostscript foo.ps 
+	
 }
 # end of barchart code
