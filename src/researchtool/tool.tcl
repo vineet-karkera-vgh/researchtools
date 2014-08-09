@@ -11,9 +11,10 @@ set colNames ""
 set sensitiveArray [list]
 
 # default values of metrics
-set missesCost 0.0
-set informationLoss 0.0
-set hidingFailure 0.0
+set missesCost NA
+set informationLoss NA
+set hidingFailure NA
+set totalCMValue NA
 
 # initialize number of elements
 set sensitiveElementDifference 0
@@ -61,7 +62,7 @@ proc getMaxQIPenalty {} {
 		set val [dict get $myQIArray $i]	
 		if {$val == 1} {
 			global checkbox$i
-			set val [expr [set checkbox$i] * 1.0]
+			set val [expr ([set checkbox$i] * 1.0 / 100)]
 			lappend myScaleList $val
 		}
 	}
@@ -139,15 +140,17 @@ proc getInformationLoss {} {
 };
 
 proc analyze {} {  
-	global col1 coln1 analyzeFrame welcomeFrame missesCost hidingFailure cpuUtil checkboxHidingFailure checkboxMissesCost
+	global col1 coln1 analyzeFrame welcomeFrame missesCost hidingFailure cpuUtil checkboxHidingFailure checkboxMissesCost checkboxCM totalCMValue
 	set analyzeFrame ".analyzeFrame";
 	set resultsFrame ".resultsFrame";
 	
 	
-	getFrequencyCount;
-	
+		
 	#set the start of the stopwatch
 	set TIME_start [clock clicks -milliseconds]
+	
+	#creates a grouping of Qi's as selected by the user
+	createQIList
 	
 	# sets the QI groups given by user into a global array myQIArray
 	setQIArray;
@@ -156,7 +159,12 @@ proc analyze {} {
 	setPenaltyArray;
 	
 	# computes misses cost only if explicitly selected by user, or if no metric is selected by the user
-	if {($checkboxMissesCost == 1) || ($checkboxHidingFailure == 0 && $checkboxMissesCost == 0)} {
+	if {($checkboxCM == 1) || ($checkboxCM == 0 && $checkboxMissesCost == 0 && $checkboxHidingFailure == 0)} {
+		getClassificationMetric;
+	}
+	
+	# computes misses cost only if explicitly selected by user, or if no metric is selected by the user
+	if {($checkboxMissesCost == 1) || ($checkboxCM == 0 && $checkboxMissesCost == 0 && $checkboxHidingFailure == 0)} {
 		getMissesCost;
 	}
 	
@@ -164,7 +172,7 @@ proc analyze {} {
 	#getInformationLoss;
 	
 	# computes hiding Failure only if explicitly selected by user, or if no metric is selected by the user
-	if {($checkboxHidingFailure == 1) || ($checkboxHidingFailure == 0 && $checkboxMissesCost == 0)} {
+	if {($checkboxHidingFailure == 1) || ($checkboxCM == 0 && $checkboxMissesCost == 0 && $checkboxHidingFailure == 0)} {
 		getHidingFailure;
 	}
 	
@@ -173,11 +181,6 @@ proc analyze {} {
 	
 	#call proc to calculate CPU time
 	set cpuUtil [expr [clock clicks -milliseconds] - $TIME_start]
-	
-	#calculates time taken in the function on an average
-	#puts [time {setPenaltyArray} 100]
-	#puts [time {getMissesCost} 100]
-	#puts [time {getHidingFailure} 100]
 
 	if {[winfo exists $analyzeFrame]} { destroy $analyzeFrame };
 	frame $analyzeFrame -borderwidth 10 -background orange;
@@ -193,14 +196,29 @@ proc analyze {} {
 	pack $resultsFrame.lbl10 -expand true -fill both -padx 10 -pady 10
 
 	# widget - list of metrics
-	label $analyzeFrame.lbl7 -text "Hiding Failure - [format "%.2f" $hidingFailure] %" -background orange -compound left -foreground white -font {helvetica 14}
-	label $analyzeFrame.lbl8 -text "Misses Cost - [format "%.2f" $missesCost] %" -background orange -compound left -foreground white -font {helvetica 14}
-	label $analyzeFrame.lbl9 -text "Time Taken - [format "%.2f" $cpuUtil] milliseconds" -background orange -compound left  -foreground white -font {helvetica 14}
-	#label $analyzeFrame.lbl10 -text "CPU Utility - [format "%.2f" $cpuUtil] microseconds" -background orange -compound left  
+	if {$checkboxHidingFailure == 1 || ($checkboxHidingFailure == 0 && $checkboxMissesCost == 0 && $checkboxCM == 0)} { 
+		label $analyzeFrame.lbl7 -text "Hiding Failure - [format "%.2f" $hidingFailure] %" -background orange -compound left -foreground white -font {helvetica 14}
+	} else {
+		label $analyzeFrame.lbl7 -text "Hiding Failure - $hidingFailure" -background orange -compound left -foreground white -font {helvetica 14}
+	}
+	if {$checkboxMissesCost == 1 || ($checkboxHidingFailure == 0 && $checkboxMissesCost == 0 && $checkboxCM == 0)} { 
+		label $analyzeFrame.lbl8 -text "Misses Cost - [format "%.2f" $missesCost] %" -background orange -compound left -foreground white -font {helvetica 14}
+	} else {
+		label $analyzeFrame.lbl8 -text "Misses Cost - $missesCost" -background orange -compound left -foreground white -font {helvetica 14}
+	}
+	if {$checkboxCM == 1 || ($checkboxHidingFailure == 0 && $checkboxMissesCost == 0 && $checkboxCM == 0)} { 
+		label $analyzeFrame.lbl9 -text "Classification Metric - [format "%.2f" $totalCMValue] units" -background orange -compound left -foreground white -font {helvetica 14}
+	} else {
+		label $analyzeFrame.lbl9 -text "Classification Metric - $totalCMValue" -background orange -compound left -foreground white -font {helvetica 14}
+	}
+	label $analyzeFrame.lbl10 -text "Time Taken - [format "%.2f" $cpuUtil] milliseconds" -background orange -compound left  -foreground white -font {helvetica 14}
+	
 	button $analyzeFrame.restartButton -text "Evaluate another File" -background #79cbc8 -command {restart_metric_calculation} -padx 15 -foreground white -font {helvetica 10 bold} -width 10
+	
 	pack $analyzeFrame.lbl7 -padx 20 -side top -expand true -fill both
 	pack $analyzeFrame.lbl8 -padx 20 -expand true -fill both
 	pack $analyzeFrame.lbl9 -padx 20 -expand true -fill both
+	pack $analyzeFrame.lbl10 -padx 20 -expand true -fill both
 	pack $analyzeFrame.restartButton -padx 20 -expand true -fill both -side bottom
 	
 	# destroy previous frames and packs the new frame
@@ -216,7 +234,8 @@ proc analyze {} {
 };
 
 proc restart_metric_calculation {} {
-	global missesCost hidingFailure numCols maxPenalty myScaleList myQIArray mySensitiveArray colNames checkboxHidingFailure checkboxMissesCost delimiter
+	global missesCost hidingFailure numCols maxPenalty myScaleList myQIArray mySensitiveArray colNames checkboxHidingFailure checkboxMissesCost delimiter checkboxCM
+	global totalCMValue maxFrequencyCount frequencyCountsOriginal frequencyCountsSanitized qiListOriginal qiListSanitized t colNames numCols myFirstFile numLines
 	for {set i 0} {$i < $numCols} {incr i} {
 		global qiCheckbox$i checkbox$i
 		unset qiCheckbox$i checkbox$i
@@ -233,6 +252,18 @@ proc restart_metric_calculation {} {
 	unset colNames
 	unset checkboxHidingFailure
 	unset checkboxMissesCost
+	unset checkboxCM
+	unset qiListOriginal
+	unset qiListSanitized
+	unset frequencyCountsOriginal
+	unset frequencyCountsSanitized
+	unset maxFrequencyCount
+	unset totalCMValue
+	unset t
+	unset colNames 
+	unset numCols 
+	unset myFirstFile 
+	unset numLines
 	
 	set missesCost 0
 	set hidingFailure 0
@@ -262,22 +293,64 @@ proc lcount list {
 
 #proc to iterate through every QI/Sensitive Column and get a frequency count of each element for the classification metric
 proc getFrequencyCount {} {
-	global colNames
+	global colNames frequencyCountsOriginal frequencyCountsSanitized maxFrequencyCount qiListOriginal qiListSanitized
+	
+	#get Maximum Frequeny of grouped up QI's
+	set frequencyCountsOriginal [lsort -integer -index 1 -decr [lcount $qiListOriginal]]
+	set frequencyCountsSanitized [lsort -integer -index 1 -decr [lcount $qiListSanitized]]
+	#stores the most frequent element of the column in the a global variable
+	set maxFrequencyCount [lindex $frequencyCountsOriginal 0 0]
+}
+
+#proc to create a Quasi Identifier group list
+proc createQIList {} {
+	#contains pairs of QI elements grouped up together
+	global colNames qiListSanitized qiListOriginal
+	#initialize the QI List
+	set qiListOriginal {}
+	set qiListSanitized {}
+	#create the QI List
 	for {set i 0} {$i < [expr [llength $colNames]]} {incr i} {
-		global col$i coln$i freq_col$i freq_coln$i qiCheckbox$i checkbox$i
+		global qiCheckbox$i
 		set qicheckbox [set qiCheckbox$i]
-		set checkbox [set checkbox$i]
-		if {$qicheckbox == 1 || $checkbox > 0} {
+		if {$qicheckbox == 1} {
+			global coln$i col$i
+			set j 0
 			set column_original [set col$i]
 			set column_sanitized [set coln$i]
-			#sorts the result in descending order, the most frequent element at the top of the list
-			set result1 [lsort -integer -index 1 -decr [lcount $column_original]]
-			set result2 [lsort -integer -index 1 -decr [lcount $column_sanitized]]
-			#stores the most frequent element of the column in the a global variable
-			set freq_col$i [lindex $result1 0 0]
-			set freq_coln$i [lindex $result2 0 0]
+			foreach element $column_original {
+				lset qiListOriginal $j end+1 $element
+				incr j
+			}
+			set j 0
+			foreach element $column_sanitized {
+				lset qiListSanitized $j end+1 $element
+				incr j
+			}
+		}	
+	}
+	
+	#calculates the frequency counts of the QI set
+	getFrequencyCount;
+}
+
+#calculates classification metric based on the formula
+proc getClassificationMetric {} {
+	global frequencyCountsSanitized maxFrequencyCount totalCMValue maxPenalty numLines
+	
+	#initialize total classification metric value
+	set totalCMValue 0.0
+	set i 0
+	foreach qiPair $frequencyCountsSanitized {
+		if { [lindex $qiPair $i 0] == $maxFrequencyCount} {
+			set cmValue 0
+		} elseif {[lindex $qiPair $i 0] != $maxFrequencyCount} {
+			set cmValue [expr 1 * $maxPenalty]
 		}
-	} 
+		set totalCMValue [expr $totalCMValue + $cmValue]
+		incr i
+	}
+	set totalCMValue [expr $totalCMValue / $numLines]
 }
 
 # proc to split the first file data into columns
@@ -324,11 +397,9 @@ proc splitIntoColns {filename} {
 # proc to open first file
 proc openFile1 {} {
 	set fn "openFile1"
-	global t colNames numCols myFirstFile
+	global t colNames numCols myFirstFile numLines
 
 	set myFirstFile [tk_getOpenFile]
-
-	# puts stdout [format "%s:myFirstFile=<%s>" $fn $myFirstFile]
 
 	set fileID [open $myFirstFile r]
 
@@ -363,7 +434,7 @@ proc openFile1 {} {
 	#	} ;
 
 	close $fileID
-} ; 
+}
 
 # proc to open second file
 proc openFile2 {} {
@@ -397,7 +468,6 @@ proc openFile2 {} {
 	set numElements [expr $numLines * $numCols]
 	
 	# populates the textarea with new information
-	#set i 1
 	$t.text2 delete 1.0 end
 	$t.text2 insert end "File Loaded Successfully!!\nNumber of Attributes = $numCols\nNumber of Records = $numLines\nNumber of bytes = $bytes bytes\nNumber of elements = $numElements"
 	
@@ -547,7 +617,7 @@ proc setQuasiIdentifiers {} {
 
 # select the metrics
 proc setMetricList {} {
-	global delimiterFrame metricList welcomeFrame metricFrame checkboxHidingFailure checkboxMissesCost checkboxLossMetric checkboxClassificationMetric checkboxDiscernibilityMetric delimiter
+	global delimiterFrame metricList welcomeFrame metricFrame checkboxHidingFailure checkboxMissesCost checkboxLossMetric checkboxClassificationMetric checkboxDiscernibilityMetric delimiter checkboxCM
 	
 	set metricFrame ".metricFrame";
 	if {[winfo exists $metricFrame]} { destroy $metricFrame };
@@ -568,10 +638,11 @@ proc setMetricList {} {
 	# widget - checkbox list of metrics
 	checkbutton $metricFrame.checkboxHidingFailure -text {Hiding Failure [calculates the percentage of sensitive information that can still be effectively discovered after sanitizing the data]} -anchor nw -background orange -compound left
 	checkbutton $metricFrame.checkboxMissesCost -text {Misses Cost [measures the percentage of non-sensitive information that is hidden after the sanitization process]} -anchor nw -background orange -compound left
+	checkbutton $metricFrame.checkboxCM -text {Classification Metric [measures the classification error after the anonymization]} -anchor nw -background orange -compound left
 	#checkbutton $metricFrame.checkboxLossMetric -text {Loss Metric} -anchor nw -background orange -state disabled -compound left 
 	#checkbutton $metricFrame.checkboxClassificationMetric -text {Classification Metric} -anchor nw -background orange -state disabled -compound left 
 	#checkbutton $metricFrame.checkboxDiscernibilityMetric -text {Discernibility Metric} -anchor nw -background orange -state disabled -compound left 
-	pack $metricFrame.checkboxHidingFailure $metricFrame.checkboxMissesCost -padx 20 -side top -expand 1 -fill both
+	pack $metricFrame.checkboxHidingFailure $metricFrame.checkboxMissesCost $metricFrame.checkboxCM -padx 20 -side top -expand 1 -fill both
 	
 	# widget - next step button
 	button $metricFrame.nextStep -text "Next Step >>" -background #79cbc8 -command {setQuasiIdentifiers} -foreground white -font {helvetica 10 bold} -width 10
@@ -829,30 +900,51 @@ proc bars {w data} {
 }
 
 proc createBarChart {} {
-	global missesCost hidingFailure checkboxHidingFailure checkboxMissesCost
+	global missesCost hidingFailure totalCMValue checkboxHidingFailure checkboxMissesCost checkboxCM
 		
 	# destroy previous frame and packs the new frame
 	if {[winfo exists .sensitivityLabelFrame]} { destroy .sensitivityLabelFrame };
 	pack [canvas .c -width 240 -height 280  -background orange -highlightthickness 0] -side left -expand true -fill both
-	if { $checkboxHidingFailure == 1 && $checkboxMissesCost == 1} {
+	if { $checkboxHidingFailure == 1 && $checkboxMissesCost == 1 && $checkboxCM == 1} {
 		bars .c "
 			{{HF} [format "%.2f" $hidingFailure] red}
 			{{MC} [format "%.2f" $missesCost] yellow}
+			{{CM} [format "%.2f" $totalCMValue] blue}
 		"
-	} elseif {$checkboxHidingFailure == 1 && $checkboxMissesCost == 0} {
+	} elseif {$checkboxHidingFailure == 1 && $checkboxMissesCost == 0 && $checkboxCM == 0} {
          bars .c "
 			{{HF} [format "%.2f" $hidingFailure] red}
 		"
-	} elseif {$checkboxHidingFailure == 0 && $checkboxMissesCost == 1} {
+	} elseif {$checkboxHidingFailure == 0 && $checkboxMissesCost == 1 && $checkboxCM == 0} {
          bars .c "
 			{{MC} [format "%.2f" $missesCost] yellow}
 		"
-	} else {
+	} elseif {$checkboxHidingFailure == 0 && $checkboxMissesCost == 0 && $checkboxCM == 1} {
+         bars .c "
+			{{CM} [format "%.2f" $totalCMValue] blue}
+		"
+    } elseif {$checkboxHidingFailure == 1 && $checkboxMissesCost == 1 && $checkboxCM == 0} {
          bars .c "
 			{{HF} [format "%.2f" $hidingFailure] red}
 			{{MC} [format "%.2f" $missesCost] yellow}
 		"
-    }
+    } elseif {$checkboxHidingFailure == 1 && $checkboxMissesCost == 0 && $checkboxCM == 1} {
+         bars .c "
+			{{HF} [format "%.2f" $hidingFailure] red}
+			{{CM} [format "%.2f" $totalCMValue] blue}
+		"
+    } elseif {$checkboxHidingFailure == 0 && $checkboxMissesCost == 1 && $checkboxCM == 1} {
+         bars .c "
+			{{MC} [format "%.2f" $missesCost] yellow}
+			{{CM} [format "%.2f" $totalCMValue] blue}
+		"
+    } else {
+		bars .c "
+			{{HF} [format "%.2f" $hidingFailure] red}
+			{{MC} [format "%.2f" $missesCost] yellow}
+			{{CM} [format "%.2f" $totalCMValue] blue}
+		"
+	}
 	
 	.c create text 120 10 -anchor nw -text "Bar Chart"
 	
