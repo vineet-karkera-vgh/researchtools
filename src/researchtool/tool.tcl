@@ -727,7 +727,7 @@ proc calculate_metrics {} {
 	# widget - name of tool
 	label $welcomeFrame.border1 -text "----------------------------------------------" -background orange -foreground white -font {helvetica 12 bold}
 	pack $welcomeFrame.border1 -padx 20 -pady 5
-	label $welcomeFrame.lbl1 -text "Welcome to the Privacy Preserving Analysis tool" -background orange -foreground white -font {helvetica 16 bold}
+	label $welcomeFrame.lbl1 -text "Welcome to the Privacy Analysis Tool-kit" -background orange -foreground white -font {helvetica 16 bold}
 	label $welcomeFrame.border2 -text "----------------------------------------------" -background orange -foreground white -font {helvetica 12 bold}
 	pack $welcomeFrame.lbl1 -padx 20 -pady 5
 	pack $welcomeFrame.border2 -padx 20 -pady 5
@@ -784,7 +784,7 @@ proc calculate_metrics {} {
 # setting up window
 wm geometry . "1100x700+10+10"
 # wm attributes . -fullscreen 1
-wm title . "Privacy Preserving Analysis Tool"
+wm title . "Privacy Analysis Tool-kit (PAT)"
 
 # splitting widgets into several frames in order to display them well
 destroy .welcomeFrame .bFrame
@@ -796,7 +796,7 @@ set welcomeFrame [frame .welcomeFrame -borderwidth 10 -background orange]
 # widget - name of tool
 label $welcomeFrame.border1 -text "----------------------------------------------" -background orange -foreground white -font {helvetica 12 bold}
 pack $welcomeFrame.border1 -padx 20 -pady 5
-label $welcomeFrame.lbl1 -text "Welcome to the Privacy Preserving Analysis tool" -background orange -foreground white -font {helvetica 16 bold}
+label $welcomeFrame.lbl1 -text "Welcome to the Privacy Analysis Tool-kit" -background orange -foreground white -font {helvetica 16 bold}
 label $welcomeFrame.border2 -text "----------------------------------------------" -background orange -foreground white -font {helvetica 12 bold}
 pack $welcomeFrame.lbl1 -padx 20 -pady 5
 pack $welcomeFrame.border2 -padx 20 -pady 5
