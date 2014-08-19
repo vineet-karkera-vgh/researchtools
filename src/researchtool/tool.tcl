@@ -1,5 +1,8 @@
+# Name of the Tool: Privacy Preserving Analysis Tool
+# Author: Vineet Karkera
+# Month, Year: August, 2014
+
 #!/usr/bin/env tclsh
-#Author: Vineet Karkera
 package require Tk
 package require BWidget
 
@@ -438,8 +441,6 @@ proc getFrequencyCount {} {
 	set frequencyCountsSanitized [lsort -integer -index 1 -decr [lcount $qiListSanitized]]
 	#stores the most frequent element of the column in the a global variable
 	set maxFrequencyCount [lindex $frequencyCountsOriginal 0 0]
-	
-	#puts "frequencyCountsOriginal = $frequencyCountsOriginal , frequencyCountsSanitized = $frequencyCountsSanitized, maxFrequencyCount = $maxFrequencyCount"
 }
 
 # createQIList --
@@ -463,20 +464,14 @@ proc createQIList {} {
 		set qicheckbox [set qiCheckbox$i]
 		if {$qicheckbox == 1} {
 			global coln$i col$i
-			set j 0
 			set column_original [set col$i]
 			set column_sanitized [set coln$i]
 			foreach element $column_original {
 				lset qiListOriginal end+1 end+1 $element
-				incr j
 			}
-			puts "original $qiListOriginal"
-			set j 0
 			foreach element $column_sanitized {
 				lset qiListSanitized end+1 end+1 $element
-				incr j
 			}
-			puts "sanitized $qiListSanitized"
 		}	
 	}
 	
@@ -628,8 +623,6 @@ proc openFile2 {} {
 
 	set mySecondFile [tk_getOpenFile]
 
-	#puts stdout [format "%s:myFile=<%s>" $fn $mySecondFile]
-
 	set fileID [open $mySecondFile r]
 	
 	# fetch first line from the file - header names
@@ -714,15 +707,12 @@ proc setSensitivityLevel {} {
 		set val [set qiCheckbox$i]	
 		
 		set checkbox$i 0
-		#set c [checkbutton $sensitivityLabelFrame.checkbox$i -text $x -anchor nw -background orange];
 		if {$val == 0} {
 			set c [scale $uf.scale$i -label $x -activebackground black -orient horizontal -from 0 -to 100 -length 400 -tickinterval 10 -variable checkbox$i -background orange  -sliderrelief raised -width 8]
 		} else {
  			set c [scale $uf.scale$i -label $x -activebackground black -orient horizontal -from 0 -to 100 -length 400 -tickinterval 10 -variable checkbox$i -background red  -sliderrelief raised -width 8]
 			$uf.scale$i set 70
 		}
-		#pack $c -side top -anchor nw -expand false -padx 20 -pady 3;
-		#puts "value of i here is $i"
 		grid $c -row $i -column 1 -padx 160
 		incr i
 	}
