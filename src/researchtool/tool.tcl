@@ -22,7 +22,16 @@ set nonSensitiveElementDifference 0
 set numberOfSensitiveElements 0
 set numberOfNonSensitiveElements 0
 
+
+# setPenaltyArray --
+#
 # procedure to create a list containing the penalty values of each attribute
+#
+# Arguments:
+# None
+# Results:
+# The result is an array list called mySensitiveArray, containing
+# the penalty values of each attribute set by the user
 proc setPenaltyArray {} {
 	global colNames mySensitiveArray
 	
@@ -40,7 +49,15 @@ proc setPenaltyArray {} {
 	getMaxQIPenalty;
 }
 
+# setQIArray --
+#
 # procedure to create a list containing the Quasi Identifiers
+#
+# Arguments:
+# None
+# Results:
+# The result is an array list called myQIArray, containing
+# the attributes that are quasi-identifiers, set by the user
 proc setQIArray {} {
 	global colNames myQIArray maxPenalty
 
@@ -53,7 +70,14 @@ proc setQIArray {} {
 	}
 }
 
+# getMaxQIPenalty --
+#
 # procedure to obtain the maximum penalty value of the quasi identifiers
+#
+# Arguments:
+# None
+# Results:
+# The result is the maximum QI penalty, maxPenalty that is set by the user
 proc getMaxQIPenalty {} {
 	global colNames myQIArray maxPenalty myScaleList
 
@@ -70,7 +94,14 @@ proc getMaxQIPenalty {} {
 	set maxPenalty [lindex $myScaleList end]
 }
 
-# calculates PRIVACY (hiding failure) as defined by Oliveira in his paper, discussed further in the report submitted
+# getHidingFailure --
+#
+# calculates PRIVACY (hiding failure) as defined by Oliveira in his paper, discussed further in the report
+#
+# Arguments:
+# None
+# Results:
+# The result is the value of hidingFailure
 proc getHidingFailure {} {  
 	# find the number of sensitive elements that have been revealed
 	global hidingFailure mySensitiveArray myQIArray numCols
@@ -98,7 +129,14 @@ proc getHidingFailure {} {
 	}
 };
 
+# getMissesCost --
+#
 # calculates UTILITY (misses cost) as defined by Oliveira in his paper, discussed further in the report submitted
+#
+# Arguments:
+# None
+# Results:
+# The result is the value of missesCost
 proc getMissesCost {} {
 	# misses cost measures the percentage of non-restrictive patterns that are hidden after sanitization  
 	global missesCost mySensitiveArray myQIArray numCols
@@ -127,7 +165,14 @@ proc getMissesCost {} {
 	}
 };
 
+# getInformationLoss --
+#
 # calculates ACCURACY OR DATA QUALLITY(information loss) as defined by Oliveira in his paper, discussed further in the report submitted
+#
+# Arguments:
+# None
+# Results:
+# The result is the value of informationLoss
 proc getInformationLoss {} {  
 	global informationLoss col1 coln1 mySensitiveArray
 	set count 0
@@ -139,6 +184,15 @@ proc getInformationLoss {} {
 	set informationLoss [expr (($count * 100.00 )/ [llength $col1])]
 };
 
+# analyze --
+#
+# Procedure that is called once the Analyze button is clicked from the front end
+# calls all the necessary procedures
+#
+# Arguments:
+# None
+# Results:
+# None
 proc analyze {} {  
 	global col1 coln1 analyzeFrame welcomeFrame missesCost hidingFailure cpuUtil checkboxHidingFailure checkboxMissesCost checkboxCM totalCMValue
 	set analyzeFrame ".analyzeFrame";
@@ -235,6 +289,14 @@ proc analyze {} {
 	createBarChart;
 };
 
+# restart_metric_calculation --
+#
+# This unsets all the variables, making the tool ready for another round of calculations.
+#
+# Arguments:
+# None
+# Results:
+# The result of this procedure is to restart the program with all it's global variables unset
 proc restart_metric_calculation {} {
 	global missesCost hidingFailure numCols maxPenalty myScaleList myQIArray mySensitiveArray colNames checkboxHidingFailure checkboxMissesCost delimiter checkboxCM
 	global totalCMValue maxFrequencyCount frequencyCountsOriginal frequencyCountsSanitized qiListOriginal qiListSanitized t colNames numCols myFirstFile numLines
@@ -318,7 +380,14 @@ proc restart_metric_calculation {} {
 	calculate_metrics
 }
 
+# getFirstLineFromFile --
+#
 # proc to get the first line of the file
+#
+# Arguments:
+# filename
+# Results:
+# line - The result of this procedure is the first line of the file
 proc getFirstLineFromFile {filename} {
 	set f [open $filename r]
     set line [gets $f]
@@ -326,10 +395,24 @@ proc getFirstLineFromFile {filename} {
     return $line
 };
 
-# proc to get arithmetic sum of elements in a list
+# ladd --
+#
+# procedure to get arithmetic sum of elements in a list
+#
+# Arguments:
+# a list
+# Results:
+# The result of this procedure is the arithmetic sum of the list
 proc ladd L {expr [join $L +]+0}
 
-#proc to get the frequency of elements in a list
+# lcount --
+#
+# proc to get the frequency of elements in a list
+#
+# Arguments:
+# a list
+# Results:
+# The result of this procedure is the frequency of each element in a list
 proc lcount list {
     foreach x $list {lappend arr($x) {}}
     set res {}
@@ -339,7 +422,14 @@ proc lcount list {
     return $res
 }
 
-#proc to iterate through every QI/Sensitive Column and get a frequency count of each element for the classification metric
+# getFrequencyCount --
+#
+# procedure to iterate through every QI/Sensitive Column and get a frequency count of each element for the classification metric
+#
+# Arguments:
+# None
+# Results:
+# The result of the procedure is the maxFrequencyCount containing the most frequent QI group
 proc getFrequencyCount {} {
 	global colNames frequencyCountsOriginal frequencyCountsSanitized maxFrequencyCount qiListOriginal qiListSanitized
 	
@@ -352,7 +442,15 @@ proc getFrequencyCount {} {
 	#puts "frequencyCountsOriginal = $frequencyCountsOriginal , frequencyCountsSanitized = $frequencyCountsSanitized, maxFrequencyCount = $maxFrequencyCount"
 }
 
-#proc to create a Quasi Identifier group list
+# createQIList --
+#
+# procedure to create a Quasi Identifier group list
+#
+# Arguments:
+# None
+# Results:
+# The result of this procedure is a list of all QI columns separated individually
+# for both the original and sanitized dataset, qiListSanitized and qiListOriginal
 proc createQIList {} {
 	#contains pairs of QI elements grouped up together
 	global colNames qiListSanitized qiListOriginal
@@ -386,7 +484,14 @@ proc createQIList {} {
 	getFrequencyCount;
 }
 
-#calculates classification metric based on the formula
+# getClassificationMetric --
+#
+# calculates classification metric based on the formula
+#
+# Arguments:
+# None
+# Results:
+# The result is the totalCMValue, containing the classification metric
 proc getClassificationMetric {} {
 	global frequencyCountsSanitized maxFrequencyCount totalCMValue maxPenalty numLines
 	
@@ -405,7 +510,14 @@ proc getClassificationMetric {} {
 	set totalCMValue [expr $totalCMValue / $numLines]
 }
 
-# proc to split the first file data into columns
+# splitIntoColumns --
+#
+# procedure to split the original file data into columns
+#
+# Arguments:
+# filename
+# Results:
+# The result is a list of columns of the first file, separated out by the delimiter specified
 proc splitIntoColumns {filename} {
 	global numCols delimiter delimiterFrame
 	set f [open $filename r]	
@@ -425,7 +537,14 @@ proc splitIntoColumns {filename} {
 	}
 };
 
-# proc to split the second file data into columns
+# splitIntoColns --
+#
+# procedure to split the sanitized file data into columns
+#
+# Arguments:
+# filename
+# Results:
+# The result is a list of columns of the sanitized file, separated out by the delimiter specified
 proc splitIntoColns {filename} {
 	global numCols delimiter
 	
@@ -445,8 +564,15 @@ proc splitIntoColns {filename} {
 		}
 	}
 };
- 
-# proc to open first file
+
+# openFile1 --
+#
+# procedure to open the original file
+#
+# Arguments:
+# None
+# Results:
+# The result is a detailed description of the file uploaded by the user.
 proc openFile1 {} {
 	set fn "openFile1"
 	global t colNames numCols myFirstFile numLines
@@ -488,7 +614,14 @@ proc openFile1 {} {
 	close $fileID
 }
 
-# proc to open second file
+# openFile2 --
+#
+# procedure to open the sanitized file
+#
+# Arguments:
+# None
+# Results:
+# The result is a detailed description of the sanitized file uploaded by the user.
 proc openFile2 {} {
 	set fn "openFile2"
 	global t mySecondFile
@@ -526,7 +659,14 @@ proc openFile2 {} {
 	close $fileID
 };
 
-# Selecting the columns with sensitive information
+# setSensitivityLevel --
+#
+# selecting the columns with sensitive information
+#
+# Arguments:
+# None
+# Results:
+# The result is a GUI, where-in the user may select the level of sensitivity
 proc setSensitivityLevel {} {	
 	global colNames welcomeFrame sensitivityLabelFrame myFirstFile mySecondFile
 	
@@ -603,7 +743,14 @@ proc setSensitivityLevel {} {
 	pack .buttonFrame -side top -expand 1 -fill both
 };
 
-# Group Quasi-Identifiers
+# setQuasiIdentifiers --
+#
+# groups the quasi-identifiers
+#
+# Arguments:
+# None
+# Results:
+# The result is a front end GUI, where-in the user may select the quasi-identifiers
 proc setQuasiIdentifiers {} {	
 	global colNames welcomeFrame qiLabelFrame myFirstFile mySecondFile 
 	
@@ -667,7 +814,14 @@ proc setQuasiIdentifiers {} {
 	pack .buttonFrame -side top -expand 1 -fill both
 };
 
-# select the metrics
+# setMetricList --
+#
+# procedure to select the metrics
+#
+# Arguments:
+# None
+# Results:
+# The result is a front end GUI, where-in the user may select the metrics to be calculated
 proc setMetricList {} {
 	global delimiterFrame metricList welcomeFrame metricFrame checkboxHidingFailure checkboxMissesCost checkboxLossMetric checkboxClassificationMetric checkboxDiscernibilityMetric delimiter checkboxCM
 	
@@ -705,7 +859,14 @@ proc setMetricList {} {
 	pack $metricFrame -side top -expand true -fill both
 }
 
-# selecting the delimiter
+# getDelimiter --
+#
+# procedure to select a delimiter
+#
+# Arguments:
+# None
+# Results:
+# The result is a front end GUI, where-in the user may enter the delimiter to be used
 proc getDelimiter {} {
 	global delimiterFrame welcomeFrame delimiter
 	
@@ -742,19 +903,51 @@ proc getDelimiter {} {
 	pack $delimiterFrame -side top -expand true -fill both
 }
 
+# setDelimiter --
+#
+# procedure to select a delimiter
+#
+# Arguments:
+# None
+# Results:
+# The result is a global variable called delimiter used to store the value entered by the user
 proc setDelimiter {} {
 	global delimiter delimiterFrame
 	set delimiter [$delimiterFrame.entryDelimiter get]
 }
 
+# displayUnderConstruction --
+#
+# procedure to select a delimiter
+#
+# Arguments:
+# None
+# Results:
+# An informative message window is displayed
 proc displayUnderConstruction {} {
 	tk_dialog .dialog1 "Under Construction" "This part of the tool is under construction" info 0 OK
 }
 
+# displayHelpWindow --
+#
+# procedure to select a delimiter
+#
+# Arguments:
+# None
+# Results:
+# An informative message window is displayed
 proc displayHelpWindow {} {
 	tk_dialog .dialog1 "Help" "Follow the steps in the tool and click the 'Next' button at the bottom when done" info 0 OK
 }
 
+# displayAboutWindow --
+#
+# procedure to select a delimiter
+#
+# Arguments:
+# None
+# Results:
+# An informative message window is displayed
 proc displayAboutWindow {} {
 	tk_dialog .dialog1 "About" "This program is a free software, created as part of a Masters program at Memorial University of Newfoundland in the year 2014.\n
 This program is distributed in the hope that it will be useful, but comes with no warranty.\n
@@ -762,7 +955,14 @@ This program is distributed in the hope that it will be useful, but comes with n
 Contributors : Vineet Karkera" info 0 OK
 }
 
-#procedure to initiate the calculation of metrices
+# calculate_metrics --
+#
+# procedure that creates a GUI to upload files
+#
+# Arguments:
+# None
+# Results:
+# The results is a front end GUI, where-in the user may select the files to be analysed.
 proc calculate_metrics {} {
 	global t	
 	#deleting all previous frames
@@ -951,6 +1151,14 @@ proc bars {w data} {
     $w lower d
 }
 
+# createBarChart --
+#
+# procedure that creates the bar chart displaying the metric values
+#
+# Arguments:
+# None
+# Results:
+# A canvas is displayed on the front end, with a bar chart.
 proc createBarChart {} {
 	global missesCost hidingFailure totalCMValue checkboxHidingFailure checkboxMissesCost checkboxCM
 		
