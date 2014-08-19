@@ -11,10 +11,10 @@ set colNames ""
 set sensitiveArray [list]
 
 # default values of metrics
-set missesCost NA
-set informationLoss NA
-set hidingFailure NA
-set totalCMValue NA
+set missesCost 0.0
+set informationLoss 0.0
+set hidingFailure 0.0
+set totalCMValue 0.0
 
 # initialize number of elements
 set sensitiveElementDifference 0
@@ -199,27 +199,29 @@ proc analyze {} {
 	if {$checkboxHidingFailure == 1 || ($checkboxHidingFailure == 0 && $checkboxMissesCost == 0 && $checkboxCM == 0)} { 
 		label $analyzeFrame.lbl7 -text "Hiding Failure - [format "%.2f" $hidingFailure] %" -background orange -compound left -foreground white -font {helvetica 14}
 	} else {
-		label $analyzeFrame.lbl7 -text "Hiding Failure - $hidingFailure" -background orange -compound left -foreground white -font {helvetica 14}
+		label $analyzeFrame.lbl7 -text "Hiding Failure - NA" -background orange -compound left -foreground white -font {helvetica 14}
 	}
 	if {$checkboxMissesCost == 1 || ($checkboxHidingFailure == 0 && $checkboxMissesCost == 0 && $checkboxCM == 0)} { 
 		label $analyzeFrame.lbl8 -text "Misses Cost - [format "%.2f" $missesCost] %" -background orange -compound left -foreground white -font {helvetica 14}
 	} else {
-		label $analyzeFrame.lbl8 -text "Misses Cost - $missesCost" -background orange -compound left -foreground white -font {helvetica 14}
+		label $analyzeFrame.lbl8 -text "Misses Cost - NA" -background orange -compound left -foreground white -font {helvetica 14}
 	}
 	if {$checkboxCM == 1 || ($checkboxHidingFailure == 0 && $checkboxMissesCost == 0 && $checkboxCM == 0)} { 
 		label $analyzeFrame.lbl9 -text "Classification Metric - [format "%.2f" $totalCMValue] units" -background orange -compound left -foreground white -font {helvetica 14}
 	} else {
-		label $analyzeFrame.lbl9 -text "Classification Metric - $totalCMValue" -background orange -compound left -foreground white -font {helvetica 14}
+		label $analyzeFrame.lbl9 -text "Classification Metric - NA" -background orange -compound left -foreground white -font {helvetica 14}
 	}
 	label $analyzeFrame.lbl10 -text "Time Taken - [format "%.2f" $cpuUtil] milliseconds" -background orange -compound left  -foreground white -font {helvetica 14}
 	
 	button $analyzeFrame.restartButton -text "Evaluate another File" -background #79cbc8 -command {restart_metric_calculation} -padx 15 -foreground white -font {helvetica 10 bold} -width 10
+	button $analyzeFrame.quitButton -text "Exit" -background red -command {exit} -padx 15 -foreground white -font {helvetica 10 bold} -width 10
 	
 	pack $analyzeFrame.lbl7 -padx 20 -side top -expand true -fill both
 	pack $analyzeFrame.lbl8 -padx 20 -expand true -fill both
 	pack $analyzeFrame.lbl9 -padx 20 -expand true -fill both
 	pack $analyzeFrame.lbl10 -padx 20 -expand true -fill both
-	pack $analyzeFrame.restartButton -padx 20 -expand true -fill both -side bottom
+	pack $analyzeFrame.restartButton -padx 20 -expand true -fill both -side left
+	pack $analyzeFrame.quitButton -padx 20 -expand true -fill both -side left
 	
 	# destroy previous frames and packs the new frame
 	global sw
@@ -240,33 +242,79 @@ proc restart_metric_calculation {} {
 		global qiCheckbox$i checkbox$i
 		unset qiCheckbox$i checkbox$i
 	}
+	if {[info exists $delimiter]} {
+		unset delimiter
+	}
+	if {[info exists $missesCost]} {
+		unset missesCost
+	}
+	if {[info exists $hidingFailure]} {
+		unset hidingFailure
+	}
+	if {[info exists $numCols]} {
+		unset numCols
+	}
+	if {[info exists $maxPenalty]} {
+		unset maxPenalty
+	}
+	if {[info exists $myScaleList]} {
+		unset myScaleList
+	}
+	if {[info exists $myQIArray]} {
+		unset myQIArray
+	}
+	if {[info exists $mySensitiveArray]} {
+		unset mySensitiveArray
+	}
+	if {[info exists $colNames]} {
+		unset colNames
+	}
+	if {[info exists $checkboxHidingFailure]} {
+		unset checkboxHidingFailure
+	}
+	if {[info exists $checkboxMissesCost]} {
+		unset checkboxMissesCost
+	}
+	if {[info exists $checkboxCM]} {
+		unset checkboxCM
+	}
+	if {[info exists $qiListOriginal]} {
+		unset qiListOriginal
+	}
+	if {[info exists $qiListSanitized]} {
+		unset qiListSanitized
+	}
+	if {[info exists $frequencyCountsOriginal]} {
+		unset frequencyCountsOriginal
+	}
+	if {[info exists $frequencyCountsSanitized]} {
+		unset frequencyCountsSanitized
+	}
+	if {[info exists $maxFrequencyCount]} {
+		unset maxFrequencyCount
+	}
+	if {[info exists $totalCMValue]} {
+		unset totalCMValue
+	}
+	if {[info exists $t]} {
+		unset t
+	}
+	if {[info exists $colNames]} {
+		unset colNames 
+	}
+	if {[info exists $numCols]} {
+		unset numCols 
+	}
+	if {[info exists $myFirstFile]} {
+		unset myFirstFile 
+	}
+	if {[info exists $numLines]} {
+		unset numLines
+	}
 	
-	unset delimiter
-	unset missesCost
-	unset hidingFailure
-	unset numCols
-	unset maxPenalty
-	unset myScaleList
-	unset myQIArray
-	unset mySensitiveArray
-	unset colNames
-	unset checkboxHidingFailure
-	unset checkboxMissesCost
-	unset checkboxCM
-	unset qiListOriginal
-	unset qiListSanitized
-	unset frequencyCountsOriginal
-	unset frequencyCountsSanitized
-	unset maxFrequencyCount
-	unset totalCMValue
-	unset t
-	unset colNames 
-	unset numCols 
-	unset myFirstFile 
-	unset numLines
-	
-	set missesCost 0
-	set hidingFailure 0
+	set missesCost 0.0
+	set hidingFailure 0.0
+	set totalCMValue 0.0
 	calculate_metrics
 }
 
@@ -300,6 +348,8 @@ proc getFrequencyCount {} {
 	set frequencyCountsSanitized [lsort -integer -index 1 -decr [lcount $qiListSanitized]]
 	#stores the most frequent element of the column in the a global variable
 	set maxFrequencyCount [lindex $frequencyCountsOriginal 0 0]
+	
+	#puts "frequencyCountsOriginal = $frequencyCountsOriginal , frequencyCountsSanitized = $frequencyCountsSanitized, maxFrequencyCount = $maxFrequencyCount"
 }
 
 #proc to create a Quasi Identifier group list
@@ -319,14 +369,16 @@ proc createQIList {} {
 			set column_original [set col$i]
 			set column_sanitized [set coln$i]
 			foreach element $column_original {
-				lset qiListOriginal $j end+1 $element
+				lset qiListOriginal end+1 end+1 $element
 				incr j
 			}
+			puts "original $qiListOriginal"
 			set j 0
 			foreach element $column_sanitized {
-				lset qiListSanitized $j end+1 $element
+				lset qiListSanitized end+1 end+1 $element
 				incr j
 			}
+			puts "sanitized $qiListSanitized"
 		}	
 	}
 	
@@ -631,7 +683,7 @@ proc setMetricList {} {
 	
 	# widgets in the window
 	label $metricFrame.lblDelimiter -text "Step 4 : Select the metrics to be calculated" -background orange -compound left -foreground white -font {helvetica 11 bold}
-	label $metricFrame.lblNote -text "(Note - If no metric is selected, both Hiding Failure and Misses Cost will be calculated)" -background orange -compound left -foreground white -font {helvetica 11}
+	label $metricFrame.lblNote -text "(Note - If no metric is selected, Hiding Failure, Misses Cost and Classification Metric will be calculated)" -background orange -compound left -foreground white -font {helvetica 11}
 	label $metricFrame.lblBlank -text " " -background orange -compound left 
 	pack $metricFrame.lblDelimiter $metricFrame.lblNote $metricFrame.lblBlank -padx 20
 
@@ -727,7 +779,7 @@ proc calculate_metrics {} {
 	# widget - name of tool
 	label $welcomeFrame.border1 -text "----------------------------------------------" -background orange -foreground white -font {helvetica 12 bold}
 	pack $welcomeFrame.border1 -padx 20 -pady 5
-	label $welcomeFrame.lbl1 -text "Welcome to the Privacy Analysis Tool-kit" -background orange -foreground white -font {helvetica 16 bold}
+	label $welcomeFrame.lbl1 -text "Welcome to the Privacy Analysis Toolkit (PAT)" -background orange -foreground white -font {helvetica 16 bold}
 	label $welcomeFrame.border2 -text "----------------------------------------------" -background orange -foreground white -font {helvetica 12 bold}
 	pack $welcomeFrame.lbl1 -padx 20 -pady 5
 	pack $welcomeFrame.border2 -padx 20 -pady 5
@@ -784,7 +836,7 @@ proc calculate_metrics {} {
 # setting up window
 wm geometry . "1100x700+10+10"
 # wm attributes . -fullscreen 1
-wm title . "Privacy Analysis Tool-kit (PAT)"
+wm title . "Privacy Analysis Toolkit (PAT)"
 
 # splitting widgets into several frames in order to display them well
 destroy .welcomeFrame .bFrame
@@ -796,7 +848,7 @@ set welcomeFrame [frame .welcomeFrame -borderwidth 10 -background orange]
 # widget - name of tool
 label $welcomeFrame.border1 -text "----------------------------------------------" -background orange -foreground white -font {helvetica 12 bold}
 pack $welcomeFrame.border1 -padx 20 -pady 5
-label $welcomeFrame.lbl1 -text "Welcome to the Privacy Analysis Tool-kit" -background orange -foreground white -font {helvetica 16 bold}
+label $welcomeFrame.lbl1 -text "Welcome to the Privacy Analysis Toolkit (PAT)" -background orange -foreground white -font {helvetica 16 bold}
 label $welcomeFrame.border2 -text "----------------------------------------------" -background orange -foreground white -font {helvetica 12 bold}
 pack $welcomeFrame.lbl1 -padx 20 -pady 5
 pack $welcomeFrame.border2 -padx 20 -pady 5
